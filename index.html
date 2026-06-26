@@ -4,38 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Riva Space — Gestionale affitti brevi</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --riva:#FF3D55;
-  --riva-light:#FFE8EB;
-  --riva-dark:#CC1A2E;
-  --bg:#F7F7F8;
-  --card:#FFFFFF;
-  --border:#E5E5E7;
-  --text:#1A1A1A;
-  --text2:#6B6B6B;
-  --text3:#A0A0A5;
-}
+:root{--riva:#FF3D55;--riva-light:#FFE8EB;--riva-dark:#CC1A2E;--bg:#F7F7F8;--card:#FFFFFF;--border:#E5E5E7;--text:#1A1A1A;--text2:#6B6B6B;--text3:#A0A0A5;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
-
-/* ===== AUTH SCREENS ===== */
 .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;}
 .auth-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem;width:100%;max-width:400px;box-shadow:0 4px 24px rgba(0,0,0,.06);}
 .auth-logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:2rem;}
 .auth-logo-box{width:42px;height:42px;background:var(--riva);border-radius:11px;display:flex;align-items:center;justify-content:center;}
-.auth-logo-box svg{width:24px;height:24px;}
 .auth-logo-name{font-size:20px;font-weight:600;color:var(--text);}
 .auth-logo-name span{color:var(--riva);}
 .auth-title{font-size:18px;font-weight:600;color:var(--text);text-align:center;margin-bottom:4px;}
 .auth-sub{font-size:13px;color:var(--text2);text-align:center;margin-bottom:1.5rem;}
 .role-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:1.25rem;}
 .role-tab{border:1px solid var(--border);border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;background:var(--card);transition:all .15s;}
-.role-tab:hover{border-color:var(--riva);background:var(--riva-light);}
 .role-tab.active{border-color:var(--riva);background:var(--riva-light);}
-.role-tab svg{width:20px;height:20px;margin:0 auto 4px;display:block;color:var(--text2);}
-.role-tab.active svg{color:var(--riva);}
-.role-tab span{font-size:11px;color:var(--text2);font-weight:500;}
+.role-tab-icon{font-size:20px;margin-bottom:4px;}
+.role-tab span{font-size:11px;color:var(--text2);font-weight:500;display:block;}
 .role-tab.active span{color:var(--riva-dark);}
 .field{margin-bottom:12px;}
 .field label{font-size:12px;color:var(--text2);display:block;margin-bottom:5px;font-weight:500;}
@@ -43,317 +29,195 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .field input:focus{border-color:var(--riva);}
 .btn-riva{width:100%;background:var(--riva);border:none;border-radius:10px;padding:12px;font-size:14px;color:#fff;font-weight:600;cursor:pointer;margin-top:4px;transition:background .15s;}
 .btn-riva:hover{background:var(--riva-dark);}
+.btn-riva:disabled{opacity:.6;cursor:not-allowed;}
 .auth-switch{text-align:center;font-size:13px;color:var(--text2);margin-top:1.25rem;}
 .auth-switch a{color:var(--riva);text-decoration:none;font-weight:500;cursor:pointer;}
-.divider{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--text3);font-size:12px;}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
-
-/* ===== APP SHELL ===== */
+.error-msg{background:#FFE8EB;color:var(--riva-dark);border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:12px;display:none;}
 .app{display:none;min-height:100vh;flex-direction:column;}
 .app.visible{display:flex;}
 .topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
 .topbar-logo{display:flex;align-items:center;gap:9px;}
-.topbar-logobox{width:32px;height:32px;background:var(--riva);border-radius:8px;display:flex;align-items:center;justify-content:center;}
-.topbar-logobox svg{width:18px;height:18px;}
+.topbar-logobox{width:32px;height:32px;background:var(--riva);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;}
 .topbar-name{font-size:16px;font-weight:600;color:var(--text);}
 .topbar-name span{color:var(--riva);}
 .topbar-right{display:flex;align-items:center;gap:8px;}
-.icon-btn{width:34px;height:34px;border:1px solid var(--border);border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--card);color:var(--text2);transition:background .15s;}
-.icon-btn:hover{background:var(--bg);}
-.icon-btn svg{width:17px;height:17px;}
 .avatar{width:34px;height:34px;border-radius:50%;background:var(--riva);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;cursor:pointer;}
 .main{flex:1;padding:1.5rem;max-width:1100px;margin:0 auto;width:100%;}
 .nav-tabs{display:flex;gap:4px;margin-bottom:1.5rem;overflow-x:auto;padding-bottom:2px;}
 .nav-tab{font-size:13px;padding:7px 14px;border-radius:8px;border:1px solid transparent;cursor:pointer;color:var(--text2);background:transparent;white-space:nowrap;font-weight:500;transition:all .15s;}
-.nav-tab:hover{background:var(--card);border-color:var(--border);}
 .nav-tab.active{background:var(--card);border-color:var(--border);color:var(--text);font-weight:600;}
 .page{display:none;}
 .page.active{display:block;}
-
-/* ===== DASHBOARD ===== */
 .greeting{margin-bottom:1.5rem;}
-.greeting h1{font-size:22px;font-weight:600;color:var(--text);}
+.greeting h1{font-size:22px;font-weight:600;}
 .greeting p{font-size:14px;color:var(--text2);margin-top:4px;}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem;}
 .kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.875rem 1rem;}
 .kpi-label{font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;}
-.kpi-val{font-size:22px;font-weight:600;color:var(--text);}
+.kpi-val{font-size:22px;font-weight:600;}
 .kpi-sub{font-size:11px;margin-top:3px;color:var(--riva-dark);font-weight:500;}
-.kpi-sub.warn{color:#9A6000;}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem;}
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;}
-.card-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:7px;}
-.card-title svg{width:16px;height:16px;color:var(--riva);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-bottom:12px;}
+.card-title{font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:7px;}
 .row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);}
 .row:last-child{border-bottom:none;}
 .row-left{display:flex;align-items:center;gap:9px;}
-.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dot{width:7px;height:7px;border-radius:50%;}
 .dot.ok{background:var(--riva);}
 .dot.warn{background:#E6A817;}
-.row-name{font-size:13px;color:var(--text);font-weight:500;}
+.row-name{font-size:13px;font-weight:500;}
 .row-meta{font-size:11px;color:var(--text3);margin-top:1px;}
-.row-val{font-size:13px;font-weight:600;color:var(--text);}
-.row-sub{font-size:11px;color:var(--text3);text-align:right;}
 .badge{font-size:10px;padding:3px 8px;border-radius:999px;font-weight:600;}
 .badge.ok{background:var(--riva-light);color:var(--riva-dark);}
 .badge.warn{background:#FEF3C7;color:#9A6000;}
-.badge.blue{background:#EFF6FF;color:#1D4ED8;}
-
-/* ===== PROPRIETÀ ===== */
 .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;}
-.section-title{font-size:16px;font-weight:600;color:var(--text);}
-.btn-add{background:var(--riva);border:none;border-radius:9px;padding:8px 16px;font-size:13px;color:#fff;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;}
-.btn-add svg{width:15px;height:15px;}
+.section-title{font-size:16px;font-weight:600;}
+.btn-add{background:var(--riva);border:none;border-radius:9px;padding:8px 16px;font-size:13px;color:#fff;font-weight:600;cursor:pointer;}
 .prop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
 .prop-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;}
-.prop-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.prop-card-name{font-size:14px;font-weight:600;color:var(--text);}
-.prop-card-status{font-size:11px;font-weight:500;}
-.prop-card-status.ok{color:var(--riva);}
-.prop-card-status.warn{color:#E6A817;}
-.ota-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-top:1px solid var(--border);}
-.ota-label{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px;}
-.ota-label svg{width:14px;height:14px;}
+.prop-card-name{font-size:14px;font-weight:600;margin-bottom:4px;}
+.prop-card-addr{font-size:11px;color:var(--text3);margin-bottom:12px;}
+.ota-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid var(--border);}
+.ota-label{font-size:12px;color:var(--text2);}
 .ota-badge{font-size:10px;padding:2px 7px;border-radius:999px;font-weight:600;}
 .ota-badge.on{background:var(--riva-light);color:var(--riva-dark);}
 .ota-badge.off{background:#F3F4F6;color:var(--text3);}
 .prop-card-empty{border:2px dashed var(--border);border-radius:12px;padding:2rem;text-align:center;cursor:pointer;transition:all .15s;}
 .prop-card-empty:hover{border-color:var(--riva);background:var(--riva-light);}
-.prop-card-empty svg{width:28px;height:28px;color:var(--text3);margin:0 auto 8px;display:block;}
-.prop-card-empty p{font-size:13px;color:var(--text2);font-weight:500;}
+.prop-card-empty p{font-size:13px;color:var(--text2);font-weight:500;margin-top:8px;}
 .prop-card-empty span{font-size:12px;color:var(--text3);}
-
-/* ===== MODAL ===== */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;padding:1rem;}
 .modal-bg.open{display:flex;}
 .modal{background:var(--card);border-radius:16px;padding:1.5rem;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
-.modal-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;}
-.modal-close{width:28px;height:28px;border:1px solid var(--border);border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);}
-.modal-close svg{width:15px;height:15px;}
-.modal-section{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin:1rem 0 8px;}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;}
+.modal-close{width:28px;height:28px;border:1px solid var(--border);border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:none;font-size:16px;color:var(--text2);}
+.info-box{background:var(--riva-light);border-radius:9px;padding:10px 12px;font-size:12px;color:var(--riva-dark);margin-bottom:12px;line-height:1.6;}
 .btn-bar{display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem;}
-.btn-cancel{background:transparent;border:1px solid var(--border);border-radius:9px;padding:9px 18px;font-size:13px;color:var(--text2);cursor:pointer;font-weight:500;}
+.btn-cancel{background:transparent;border:1px solid var(--border);border-radius:9px;padding:9px 18px;font-size:13px;color:var(--text2);cursor:pointer;}
 .btn-save{background:var(--riva);border:none;border-radius:9px;padding:9px 18px;font-size:13px;color:#fff;font-weight:600;cursor:pointer;}
-.info-box{background:var(--riva-light);border-radius:9px;padding:10px 12px;font-size:12px;color:var(--riva-dark);margin-bottom:12px;line-height:1.5;}
-
-/* ===== RESPONSIVE ===== */
-@media(max-width:768px){
-  .kpi-grid{grid-template-columns:repeat(2,1fr);}
-  .two-col{grid-template-columns:1fr;}
-  .main{padding:1rem;}
-}
-@media(max-width:480px){
-  .kpi-grid{grid-template-columns:repeat(2,1fr);}
-}
+.loading{text-align:center;padding:3rem;color:var(--text2);font-size:14px;}
+@media(max-width:768px){.kpi-grid{grid-template-columns:repeat(2,1fr);}.main{padding:1rem;}}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div class="auth-wrap" id="loginScreen">
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="auth-logo-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-        </svg>
-      </div>
+      <div class="auth-logo-box">🏠</div>
       <div class="auth-logo-name">Riva <span>Space</span></div>
     </div>
     <div class="auth-title">Bentornato</div>
     <div class="auth-sub">Accedi al tuo account</div>
     <div class="role-tabs">
       <div class="role-tab active" onclick="selectRole(this,'proprietario')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
-        <span>Proprietario</span>
+        <div class="role-tab-icon">🏢</div><span>Proprietario</span>
       </div>
       <div class="role-tab" onclick="selectRole(this,'cliente')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span>Cliente</span>
+        <div class="role-tab-icon">👤</div><span>Cliente</span>
       </div>
       <div class="role-tab" onclick="selectRole(this,'pulizie')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22l3-3m0 0l7.5-7.5M6 19l7.5-7.5m0 0L17 8l-1-4 4-1-1 4-3.5 3.5"/></svg>
-        <span>Pulizie</span>
+        <div class="role-tab-icon">🧹</div><span>Pulizie</span>
       </div>
     </div>
+    <div class="error-msg" id="loginError"></div>
     <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="mario@rivaaffitti.it"></div>
     <div class="field"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
-    <button class="btn-riva" onclick="doLogin()">Accedi</button>
+    <button class="btn-riva" id="loginBtn" onclick="doLogin()">Accedi</button>
     <div class="auth-switch">Non hai un account? <a onclick="showRegister()">Registrati gratis</a></div>
   </div>
 </div>
 
-<!-- REGISTRAZIONE -->
 <div class="auth-wrap" id="registerScreen" style="display:none;">
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="auth-logo-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-        </svg>
-      </div>
+      <div class="auth-logo-box">🏠</div>
       <div class="auth-logo-name">Riva <span>Space</span></div>
     </div>
     <div class="auth-title">Crea il tuo account</div>
     <div class="auth-sub">14 giorni gratis, nessuna carta richiesta</div>
+    <div class="error-msg" id="registerError"></div>
     <div class="field"><label>Nome e cognome</label><input type="text" id="regName" placeholder="Mario Rossi"></div>
     <div class="field"><label>Email</label><input type="email" id="regEmail" placeholder="mario@rivaaffitti.it"></div>
     <div class="field"><label>Password</label><input type="password" id="regPassword" placeholder="Almeno 8 caratteri"></div>
     <div class="field"><label>Nome azienda (opzionale)</label><input type="text" id="regAzienda" placeholder="Riva Affitti"></div>
-    <button class="btn-riva" onclick="doRegister()">Crea account gratis</button>
+    <button class="btn-riva" id="registerBtn" onclick="doRegister()">Crea account gratis</button>
     <div class="auth-switch">Hai già un account? <a onclick="showLogin()">Accedi</a></div>
   </div>
 </div>
 
-<!-- APP -->
 <div class="app" id="appShell">
   <div class="topbar">
     <div class="topbar-logo">
-      <div class="topbar-logobox">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-        </svg>
-      </div>
+      <div class="topbar-logobox">🏠</div>
       <div class="topbar-name">Riva <span>Space</span></div>
     </div>
     <div class="topbar-right">
-      <div class="icon-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-      </div>
-      <div class="avatar" id="userAvatar" onclick="doLogout()">MA</div>
+      <div class="avatar" id="userAvatar" onclick="doLogout()" title="Clicca per uscire">MA</div>
     </div>
   </div>
   <div class="main">
     <div class="nav-tabs">
       <div class="nav-tab active" onclick="showPage('dashboard',this)">Dashboard</div>
       <div class="nav-tab" onclick="showPage('proprieta',this)">Proprietà</div>
-      <div class="nav-tab" onclick="showPage('calendario',this)">Calendario</div>
-      <div class="nav-tab" onclick="showPage('pulizie',this)">Pulizie</div>
-      <div class="nav-tab" onclick="showPage('report',this)">Report</div>
       <div class="nav-tab" onclick="showPage('impostazioni',this)">Impostazioni</div>
     </div>
 
-    <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
       <div class="greeting">
-        <h1 id="greetingTitle">Buongiorno!</h1>
-        <p id="greetingSub">Benvenuto su Riva Space — aggiungi la tua prima proprietà per iniziare.</p>
+        <h1 id="greetingTitle">Benvenuto!</h1>
+        <p id="greetingSub">Aggiungi la tua prima proprietà per iniziare.</p>
       </div>
       <div class="kpi-grid">
         <div class="kpi"><div class="kpi-label">Proprietà</div><div class="kpi-val" id="kpiProps">0</div><div class="kpi-sub">attive</div></div>
-        <div class="kpi"><div class="kpi-label">Prenotazioni</div><div class="kpi-val">0</div><div class="kpi-sub">questo mese</div></div>
+        <div class="kpi"><div class="kpi-label">Collegate</div><div class="kpi-val" id="kpiCollegate">0</div><div class="kpi-sub">su Airbnb/Booking</div></div>
         <div class="kpi"><div class="kpi-label">Doppie pren.</div><div class="kpi-val">0</div><div class="kpi-sub" style="color:var(--riva);">tutto ok</div></div>
-        <div class="kpi"><div class="kpi-label">Sincronizzazione</div><div class="kpi-val" style="font-size:15px;padding-top:4px;">—</div><div class="kpi-sub warn">nessuna casa</div></div>
+        <div class="kpi"><div class="kpi-label">Stato</div><div class="kpi-val" style="font-size:14px;padding-top:4px;" id="kpiStato">—</div></div>
       </div>
       <div class="card">
-        <div class="card-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          Per iniziare
-        </div>
-        <div class="row">
-          <div class="row-left"><div class="dot ok"></div><div><div class="row-name">Crea il tuo account</div><div class="row-meta">Fatto!</div></div></div>
-          <span class="badge ok">✓ Fatto</span>
-        </div>
-        <div class="row" style="cursor:pointer;" onclick="showPage('proprieta',null);document.querySelectorAll('.nav-tab')[1].click()">
-          <div class="row-left"><div class="dot warn"></div><div><div class="row-name">Aggiungi la tua prima proprietà</div><div class="row-meta">Clicca per iniziare</div></div></div>
-          <span class="badge warn">Da fare</span>
-        </div>
-        <div class="row">
-          <div class="row-left"><div class="dot" style="background:var(--border)"></div><div><div class="row-name">Collega Airbnb e Booking</div><div class="row-meta">Dopo aver aggiunto una proprietà</div></div></div>
-          <span class="badge" style="background:#F3F4F6;color:var(--text3);">In attesa</span>
-        </div>
-        <div class="row">
-          <div class="row-left"><div class="dot" style="background:var(--border)"></div><div><div class="row-name">Prima sincronizzazione</div><div class="row-meta">Automatica dopo il collegamento</div></div></div>
-          <span class="badge" style="background:#F3F4F6;color:var(--text3);">In attesa</span>
-        </div>
+        <div class="card-title">⚡ Per iniziare</div>
+        <div class="row"><div class="row-left"><div class="dot ok"></div><div><div class="row-name">Account creato</div><div class="row-meta">Fatto!</div></div></div><span class="badge ok">✓</span></div>
+        <div class="row" style="cursor:pointer" onclick="document.querySelectorAll('.nav-tab')[1].click()"><div class="row-left"><div class="dot warn" id="step2dot"></div><div><div class="row-name">Aggiungi prima proprietà</div><div class="row-meta" id="step2meta">Clicca per iniziare</div></div></div><span class="badge warn" id="step2badge">Da fare</span></div>
+        <div class="row"><div class="row-left"><div class="dot" style="background:var(--border)" id="step3dot"></div><div><div class="row-name">Collega Airbnb e Booking</div><div class="row-meta">Dopo aver aggiunto una proprietà</div></div></div><span class="badge" style="background:#F3F4F6;color:var(--text3);" id="step3badge">In attesa</span></div>
       </div>
     </div>
 
-    <!-- PROPRIETÀ -->
     <div class="page" id="page-proprieta">
       <div class="section-header">
         <div class="section-title">Le tue proprietà</div>
-        <button class="btn-add" onclick="openAddProp()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Aggiungi
-        </button>
+        <button class="btn-add" onclick="openAddProp()">+ Aggiungi</button>
       </div>
-      <div class="prop-grid" id="propGrid">
-        <div class="prop-card-empty" onclick="openAddProp()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <p>Aggiungi una proprietà</p>
-          <span>Collega Airbnb, Booking e altri</span>
-        </div>
-      </div>
+      <div class="prop-grid" id="propGrid"><div class="loading">Caricamento...</div></div>
     </div>
 
-    <!-- CALENDARIO -->
-    <div class="page" id="page-calendario">
-      <div class="section-title" style="margin-bottom:1rem;">Calendario occupazioni</div>
-      <div class="card" style="text-align:center;padding:3rem 1rem;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5" style="width:40px;height:40px;margin:0 auto 12px;display:block;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <p style="font-size:14px;color:var(--text2);">Aggiungi una proprietà per vedere il calendario</p>
-      </div>
-    </div>
-
-    <!-- PULIZIE -->
-    <div class="page" id="page-pulizie">
-      <div class="section-title" style="margin-bottom:1rem;">Gestione pulizie</div>
-      <div class="card" style="text-align:center;padding:3rem 1rem;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5" style="width:40px;height:40px;margin:0 auto 12px;display:block;"><path d="M3 22l3-3m0 0l7.5-7.5M6 19l7.5-7.5m0 0L17 8l-1-4 4-1-1 4-3.5 3.5"/></svg>
-        <p style="font-size:14px;color:var(--text2);">Nessun intervento programmato</p>
-      </div>
-    </div>
-
-    <!-- REPORT -->
-    <div class="page" id="page-report">
-      <div class="section-title" style="margin-bottom:1rem;">Report guadagni</div>
-      <div class="card" style="text-align:center;padding:3rem 1rem;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5" style="width:40px;height:40px;margin:0 auto 12px;display:block;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        <p style="font-size:14px;color:var(--text2);">I report appariranno dopo la prima sincronizzazione</p>
-      </div>
-    </div>
-
-    <!-- IMPOSTAZIONI -->
     <div class="page" id="page-impostazioni">
       <div class="section-title" style="margin-bottom:1rem;">Impostazioni account</div>
-      <div class="card" style="margin-bottom:12px;">
-        <div class="card-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Profilo
-        </div>
+      <div class="card">
+        <div class="card-title">👤 Profilo</div>
         <div class="field"><label>Nome</label><input type="text" id="settName" placeholder="Il tuo nome"></div>
-        <div class="field"><label>Email</label><input type="email" id="settEmail" placeholder="La tua email"></div>
+        <div class="field"><label>Email</label><input type="email" id="settEmail" placeholder="La tua email" disabled style="opacity:.6"></div>
         <div class="field"><label>Azienda</label><input type="text" id="settAzienda" placeholder="Nome azienda"></div>
-        <button class="btn-riva" style="width:auto;padding:9px 20px;margin-top:4px;" onclick="saveSettings()">Salva modifiche</button>
+        <button class="btn-riva" style="width:auto;padding:9px 20px;" onclick="saveSettings()">Salva modifiche</button>
       </div>
       <div class="card">
-        <div class="card-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
-          Piattaforme collegate
-        </div>
-        <p style="font-size:13px;color:var(--text2);">Aggiungi una proprietà per collegare Airbnb, Booking e altre piattaforme.</p>
+        <div class="card-title">🚪 Account</div>
+        <button onclick="doLogout()" style="background:none;border:1px solid var(--border);border-radius:9px;padding:9px 18px;font-size:13px;cursor:pointer;color:var(--text2);">Esci dall'account</button>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- MODAL AGGIUNGI PROPRIETÀ -->
 <div class="modal-bg" id="modalAddProp">
   <div class="modal">
     <div class="modal-title">
       Nuova proprietà
-      <div class="modal-close" onclick="closeModal('modalAddProp')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </div>
+      <button class="modal-close" onclick="closeModal('modalAddProp')">✕</button>
     </div>
-    <div class="field"><label>Nome proprietà</label><input type="text" id="propNome" placeholder="Es. Appartamento Roma Centro"></div>
+    <div class="field"><label>Nome proprietà *</label><input type="text" id="propNome" placeholder="Es. Appartamento Roma Centro"></div>
     <div class="field"><label>Indirizzo</label><input type="text" id="propIndirizzo" placeholder="Via Roma 1, Roma"></div>
-    <div class="modal-section">Collega le piattaforme</div>
+    <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin:1rem 0 8px;">Collega le piattaforme</div>
     <div class="info-box">
-      💡 Per trovare il link su <strong>Airbnb</strong>: vai su Airbnb → Il tuo profilo → Annunci → seleziona la casa → Disponibilità → Sincronizza calendario → copia il link "Esporta".<br><br>
-      Per <strong>Booking.com</strong>: accedi all'extranet → Proprietà → Impostazioni camera → Sincronizza calendario → copia il link iCal.
+      💡 <strong>Airbnb:</strong> Annunci → seleziona casa → Disponibilità → Sincronizza calendario → copia link "Esporta"<br><br>
+      💡 <strong>Booking:</strong> Extranet → Proprietà → Impostazioni → Sincronizza calendario → copia link iCal
     </div>
     <div class="field"><label>Link Airbnb (iCal)</label><input type="url" id="propAirbnb" placeholder="https://www.airbnb.it/calendar/ical/..."></div>
     <div class="field"><label>Link Booking.com (iCal)</label><input type="url" id="propBooking" placeholder="https://ical.booking.com/v1/..."></div>
@@ -361,194 +225,211 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="field"><label>Link sito proprio (opzionale)</label><input type="url" id="propSito" placeholder="https://tuosito.it/calendario.ics"></div>
     <div class="btn-bar">
       <button class="btn-cancel" onclick="closeModal('modalAddProp')">Annulla</button>
-      <button class="btn-save" onclick="saveProp()">Salva proprietà</button>
+      <button class="btn-save" onclick="saveProp()" id="savePropBtn">Salva proprietà</button>
     </div>
   </div>
 </div>
 
 <script>
+const SUPABASE_URL = 'https://ugxfgybstjgqwurpirnd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVneGZneWJzdGpncXd1cnBpcm5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5NTYwOTcsImV4cCI6MjA2NjUzMjA5N30.F8dPRoDbFykrLhLY42BSf4VlMpoOCLGcxCMFDBzaQxs';
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 let currentRole = 'proprietario';
-let userData = JSON.parse(localStorage.getItem('rivaspace_user') || 'null');
-let properties = JSON.parse(localStorage.getItem('rivaspace_props') || '[]');
+let currentUser = null;
+let properties = [];
 
-// Check if already logged in
-if(userData) showApp();
+// Init
+sb.auth.getSession().then(({ data: { session } }) => {
+  if (session) { currentUser = session.user; showApp(); }
+});
 
-function selectRole(el, role){
-  document.querySelectorAll('.role-tab').forEach(t=>t.classList.remove('active'));
+sb.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' && session) { currentUser = session.user; showApp(); }
+  if (event === 'SIGNED_OUT') { currentUser = null; showLogin(); }
+});
+
+function selectRole(el, role) {
+  document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
   currentRole = role;
 }
 
-function showRegister(){
-  document.getElementById('loginScreen').style.display='none';
-  document.getElementById('registerScreen').style.display='flex';
+function showRegister() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('registerScreen').style.display = 'flex';
 }
 
-function showLogin(){
-  document.getElementById('registerScreen').style.display='none';
-  document.getElementById('loginScreen').style.display='flex';
+function showLogin() {
+  document.getElementById('registerScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appShell').classList.remove('visible');
 }
 
-function doRegister(){
+async function doRegister() {
   const name = document.getElementById('regName').value.trim();
   const email = document.getElementById('regEmail').value.trim();
   const password = document.getElementById('regPassword').value;
   const azienda = document.getElementById('regAzienda').value.trim();
-  if(!name || !email || !password){ alert('Compila tutti i campi obbligatori'); return; }
-  if(password.length < 8){ alert('La password deve avere almeno 8 caratteri'); return; }
-  userData = {name, email, azienda, role: currentRole};
-  localStorage.setItem('rivaspace_user', JSON.stringify(userData));
-  showApp();
+  const errEl = document.getElementById('registerError');
+  const btn = document.getElementById('registerBtn');
+
+  if (!name || !email || !password) { showError(errEl, 'Compila tutti i campi obbligatori'); return; }
+  if (password.length < 8) { showError(errEl, 'La password deve avere almeno 8 caratteri'); return; }
+
+  btn.disabled = true; btn.textContent = 'Creando account...';
+  const { data, error } = await sb.auth.signUp({
+    email, password,
+    options: { data: { full_name: name, azienda, role: currentRole } }
+  });
+
+  if (error) { showError(errEl, error.message); btn.disabled = false; btn.textContent = 'Crea account gratis'; return; }
+  
+  // Save profile
+  if (data.user) {
+    await sb.from('profiles').upsert({ id: data.user.id, full_name: name, azienda, role: currentRole });
+  }
+  btn.disabled = false; btn.textContent = 'Crea account gratis';
 }
 
-function doLogin(){
+async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
-  if(!email || !password){ alert('Inserisci email e password'); return; }
-  // Per il test: accetta qualsiasi credenziale
-  if(!userData){ userData = {name: email.split('@')[0], email, role: currentRole}; }
-  localStorage.setItem('rivaspace_user', JSON.stringify(userData));
-  showApp();
+  const errEl = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+
+  if (!email || !password) { showError(errEl, 'Inserisci email e password'); return; }
+
+  btn.disabled = true; btn.textContent = 'Accesso in corso...';
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { showError(errEl, 'Email o password non corretti'); btn.disabled = false; btn.textContent = 'Accedi'; }
 }
 
-function showApp(){
-  document.getElementById('loginScreen').style.display='none';
-  document.getElementById('registerScreen').style.display='none';
+async function doLogout() {
+  if (!confirm('Vuoi uscire da Riva Space?')) return;
+  await sb.auth.signOut();
+}
+
+function showError(el, msg) {
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+
+async function showApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('registerScreen').style.display = 'none';
   document.getElementById('appShell').classList.add('visible');
-  const initials = (userData.name||'U').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+
+  // Get profile
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  const name = profile?.full_name || currentUser.email.split('@')[0];
+  const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  
   document.getElementById('userAvatar').textContent = initials;
-  document.getElementById('greetingTitle').textContent = 'Ciao, ' + (userData.name||'').split(' ')[0] + '!';
-  updateDashboard();
-  renderProps();
+  document.getElementById('greetingTitle').textContent = 'Ciao, ' + name.split(' ')[0] + '!';
+  document.getElementById('settName').value = name;
+  document.getElementById('settEmail').value = currentUser.email;
+  document.getElementById('settAzienda').value = profile?.azienda || '';
+
+  await loadProps();
 }
 
-function doLogout(){
-  if(!confirm('Vuoi uscire da Riva Space?')) return;
-  userData = null;
-  localStorage.removeItem('rivaspace_user');
-  document.getElementById('appShell').classList.remove('visible');
-  document.getElementById('loginScreen').style.display='flex';
-}
-
-function showPage(id, tabEl){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  if(tabEl) tabEl.classList.add('active');
-}
-
-function openAddProp(){
-  document.getElementById('modalAddProp').classList.add('open');
-}
-
-function closeModal(id){
-  document.getElementById(id).classList.remove('open');
-}
-
-function saveProp(){
-  const nome = document.getElementById('propNome').value.trim();
-  const indirizzo = document.getElementById('propIndirizzo').value.trim();
-  const airbnb = document.getElementById('propAirbnb').value.trim();
-  const booking = document.getElementById('propBooking').value.trim();
-  const vrbo = document.getElementById('propVrbo').value.trim();
-  const sito = document.getElementById('propSito').value.trim();
-  if(!nome){ alert('Inserisci il nome della proprietà'); return; }
-  const prop = {id: Date.now(), nome, indirizzo, airbnb, booking, vrbo, sito};
-  properties.push(prop);
-  localStorage.setItem('rivaspace_props', JSON.stringify(properties));
-  closeModal('modalAddProp');
-  document.getElementById('propNome').value='';
-  document.getElementById('propIndirizzo').value='';
-  document.getElementById('propAirbnb').value='';
-  document.getElementById('propBooking').value='';
-  document.getElementById('propVrbo').value='';
-  document.getElementById('propSito').value='';
+async function loadProps() {
+  const { data } = await sb.from('properties').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  properties = data || [];
   renderProps();
   updateDashboard();
 }
 
-function renderProps(){
+function updateDashboard() {
+  const collegate = properties.filter(p => p.airbnb_url || p.booking_url).length;
+  document.getElementById('kpiProps').textContent = properties.length;
+  document.getElementById('kpiCollegate').textContent = collegate;
+  document.getElementById('kpiStato').textContent = properties.length > 0 ? '✓ Attivo' : '—';
+
+  if (properties.length > 0) {
+    document.getElementById('greetingSub').textContent = 'Hai ' + properties.length + ' proprietà gestite con Riva Space.';
+    document.getElementById('step2dot').className = 'dot ok';
+    document.getElementById('step2badge').className = 'badge ok';
+    document.getElementById('step2badge').textContent = '✓';
+    document.getElementById('step2meta').textContent = properties.length + ' proprietà aggiunte';
+  }
+}
+
+function renderProps() {
   const grid = document.getElementById('propGrid');
   grid.innerHTML = '';
   properties.forEach(p => {
-    const hasBoth = p.airbnb && p.booking;
     const card = document.createElement('div');
     card.className = 'prop-card';
     card.innerHTML = `
-      <div class="prop-card-header">
-        <div class="prop-card-name">${p.nome}</div>
-        <div class="prop-card-status ${hasBoth?'ok':'warn'}">${hasBoth?'Sincronizzato':'Incompleto'}</div>
-      </div>
-      ${p.indirizzo ? `<div style="font-size:11px;color:var(--text3);margin-bottom:10px;">${p.indirizzo}</div>` : ''}
-      <div class="ota-row">
-        <div class="ota-label">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>
-          Airbnb
-        </div>
-        <span class="ota-badge ${p.airbnb?'on':'off'}">${p.airbnb?'Collegato':'Da collegare'}</span>
-      </div>
-      <div class="ota-row">
-        <div class="ota-label">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          Booking.com
-        </div>
-        <span class="ota-badge ${p.booking?'on':'off'}">${p.booking?'Collegato':'Da collegare'}</span>
-      </div>
-      ${p.vrbo ? `<div class="ota-row"><div class="ota-label">VRBO</div><span class="ota-badge on">Collegato</span></div>` : ''}
-      ${p.sito ? `<div class="ota-row"><div class="ota-label">Sito proprio</div><span class="ota-badge on">Collegato</span></div>` : ''}
-      <div style="margin-top:10px;">
-        <button onclick="deleteProp(${p.id})" style="font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:0;">Elimina proprietà</button>
+      <div class="prop-card-name">${p.nome}</div>
+      ${p.indirizzo ? `<div class="prop-card-addr">📍 ${p.indirizzo}</div>` : '<div style="margin-bottom:12px;"></div>'}
+      <div class="ota-row"><span class="ota-label">Airbnb</span><span class="ota-badge ${p.airbnb_url ? 'on' : 'off'}">${p.airbnb_url ? 'Collegato' : 'Da collegare'}</span></div>
+      <div class="ota-row"><span class="ota-label">Booking.com</span><span class="ota-badge ${p.booking_url ? 'on' : 'off'}">${p.booking_url ? 'Collegato' : 'Da collegare'}</span></div>
+      ${p.vrbo_url ? `<div class="ota-row"><span class="ota-label">VRBO</span><span class="ota-badge on">Collegato</span></div>` : ''}
+      ${p.sito_url ? `<div class="ota-row"><span class="ota-label">Sito proprio</span><span class="ota-badge on">Collegato</span></div>` : ''}
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+        <button onclick="deleteProp('${p.id}')" style="font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;">🗑 Elimina</button>
       </div>
     `;
     grid.appendChild(card);
   });
-  // Add button
   const addBtn = document.createElement('div');
   addBtn.className = 'prop-card-empty';
   addBtn.onclick = openAddProp;
-  addBtn.innerHTML = `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    <p>Aggiungi una proprietà</p>
-    <span>Collega Airbnb, Booking e altri</span>
-  `;
+  addBtn.innerHTML = `<div style="font-size:32px;">🏠</div><p>Aggiungi proprietà</p><span>Collega Airbnb, Booking e altri</span>`;
   grid.appendChild(addBtn);
 }
 
-function deleteProp(id){
-  if(!confirm('Vuoi eliminare questa proprietà?')) return;
-  properties = properties.filter(p=>p.id!==id);
-  localStorage.setItem('rivaspace_props', JSON.stringify(properties));
-  renderProps();
-  updateDashboard();
+function openAddProp() { document.getElementById('modalAddProp').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+async function saveProp() {
+  const nome = document.getElementById('propNome').value.trim();
+  if (!nome) { alert('Inserisci il nome della proprietà'); return; }
+  const btn = document.getElementById('savePropBtn');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+
+  const { error } = await sb.from('properties').insert({
+    user_id: currentUser.id,
+    nome,
+    indirizzo: document.getElementById('propIndirizzo').value.trim(),
+    airbnb_url: document.getElementById('propAirbnb').value.trim(),
+    booking_url: document.getElementById('propBooking').value.trim(),
+    vrbo_url: document.getElementById('propVrbo').value.trim(),
+    sito_url: document.getElementById('propSito').value.trim(),
+  });
+
+  btn.disabled = false; btn.textContent = 'Salva proprietà';
+  if (error) { alert('Errore nel salvare: ' + error.message); return; }
+
+  ['propNome','propIndirizzo','propAirbnb','propBooking','propVrbo','propSito'].forEach(id => document.getElementById(id).value = '');
+  closeModal('modalAddProp');
+  await loadProps();
 }
 
-function updateDashboard(){
-  document.getElementById('kpiProps').textContent = properties.length;
-  if(properties.length > 0){
-    document.getElementById('greetingSub').textContent = 'Hai ' + properties.length + ' proprietà. Collega Airbnb e Booking per iniziare a sincronizzare.';
-  }
+async function deleteProp(id) {
+  if (!confirm('Eliminare questa proprietà?')) return;
+  await sb.from('properties').delete().eq('id', id);
+  await loadProps();
 }
 
-function saveSettings(){
+async function saveSettings() {
   const name = document.getElementById('settName').value.trim();
-  const email = document.getElementById('settEmail').value.trim();
   const azienda = document.getElementById('settAzienda').value.trim();
-  if(name) userData.name = name;
-  if(email) userData.email = email;
-  if(azienda) userData.azienda = azienda;
-  localStorage.setItem('rivaspace_user', JSON.stringify(userData));
-  alert('Impostazioni salvate!');
+  await sb.from('profiles').upsert({ id: currentUser.id, full_name: name, azienda });
+  alert('Salvato!');
 }
 
-// Pre-fill settings
-window.addEventListener('load', () => {
-  if(userData){
-    if(document.getElementById('settName')) document.getElementById('settName').value = userData.name||'';
-    if(document.getElementById('settEmail')) document.getElementById('settEmail').value = userData.email||'';
-    if(document.getElementById('settAzienda')) document.getElementById('settAzienda').value = userData.azienda||'';
-  }
-});
+function showPage(id, tabEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (tabEl) tabEl.classList.add('active');
+}
 </script>
 </body>
 </html>
