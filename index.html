@@ -33,6 +33,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .auth-switch{text-align:center;font-size:13px;color:var(--text2);margin-top:1.25rem;}
 .auth-switch a{color:var(--riva);text-decoration:none;font-weight:500;cursor:pointer;}
 .error-msg{background:#FFE8EB;color:var(--riva-dark);border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:12px;display:none;}
+.success-msg{background:#E8F5E9;color:#2E7D32;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:12px;display:none;}
 .app{display:none;min-height:100vh;flex-direction:column;}
 .app.visible{display:flex;}
 .topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
@@ -42,7 +43,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .topbar-name span{color:var(--riva);}
 .topbar-right{display:flex;align-items:center;gap:8px;}
 .avatar{width:34px;height:34px;border-radius:50%;background:var(--riva);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;cursor:pointer;}
-.main{flex:1;padding:1.5rem;max-width:1100px;margin:0 auto;width:100%;}
+.main{flex:1;padding:1.5rem;max-width:100%;margin:0 auto;width:100%;}
 .nav-tabs{display:flex;gap:4px;margin-bottom:1.5rem;overflow-x:auto;padding-bottom:2px;}
 .nav-tab{font-size:13px;padding:7px 14px;border-radius:8px;border:1px solid transparent;cursor:pointer;color:var(--text2);background:transparent;white-space:nowrap;font-weight:500;transition:all .15s;}
 .nav-tab.active{background:var(--card);border-color:var(--border);color:var(--text);font-weight:600;}
@@ -95,24 +96,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-cancel{background:transparent;border:1px solid var(--border);border-radius:9px;padding:9px 18px;font-size:13px;color:var(--text2);cursor:pointer;}
 .btn-save{background:var(--riva);border:none;border-radius:9px;padding:9px 18px;font-size:13px;color:#fff;font-weight:600;cursor:pointer;}
 .loading{text-align:center;padding:3rem;color:var(--text2);font-size:14px;}
-.cal-month-title{font-size:15px;font-weight:600;color:var(--text);margin:1.25rem 0 .75rem;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:1.5rem;}
-.cal-day-name{font-size:11px;color:var(--text3);text-align:center;padding:4px 0;font-weight:500;}
-.cal-day{min-height:52px;border-radius:6px;padding:4px;background:var(--card);border:1px solid var(--border);}
-.cal-day.empty{background:transparent;border-color:transparent;}
-.cal-day.today{border:2px solid var(--riva);}
-.cal-day-num{font-size:11px;color:var(--text2);margin-bottom:2px;font-weight:500;}
-.cal-day.today .cal-day-num{color:var(--riva);font-weight:700;}
-.cal-event{font-size:9px;border-radius:3px;padding:1px 4px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.cal-event.airbnb{background:#FFE8EB;color:#CC1A2E;}
-.cal-event.booking{background:#E6F1FB;color:#1D4ED8;}
-.cal-event.vrbo{background:#EDE9FE;color:#6D28D9;}
-.cal-event.conflict{background:#FEF3C7;color:#9A6000;font-weight:700;}
+
+/* CALENDARIO A GRIGLIA */
+.cal-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border);background:var(--bg);}
+.cal-nav-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;}
+.cal-nav-btn:hover{background:var(--riva-light);}
+.cal-month-name{font-size:16px;font-weight:600;color:var(--text);}
+.cal-table{width:100%;border-collapse:collapse;overflow-x:auto;display:block;}
+.cal-table th{font-size:11px;color:var(--text3);font-weight:500;text-align:center;padding:6px 2px;border-right:1px solid var(--border);white-space:nowrap;min-width:32px;}
+.cal-table th.prop-col{text-align:left;padding:6px 12px;min-width:160px;max-width:160px;position:sticky;left:0;background:var(--bg);z-index:10;}
+.cal-table td{border:1px solid var(--border);padding:0;height:36px;min-width:32px;max-width:32px;position:relative;vertical-align:middle;text-align:center;}
+.cal-table td.prop-name-cell{text-align:left;padding:4px 12px;font-size:12px;font-weight:600;color:var(--text);background:var(--bg);border-right:2px solid var(--border);position:sticky;left:0;z-index:5;min-width:160px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cal-table td.day-num{font-size:10px;color:var(--text3);background:transparent;}
+.cal-table td.today-col{background:#FFF5F5;}
+.cal-table td.today-col .day-num-inner{color:var(--riva);font-weight:700;}
+.cal-cell-inner{font-size:9px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 2px;line-height:1.2;display:flex;flex-direction:column;justify-content:center;height:100%;cursor:pointer;}
+.cal-cell-inner:hover{opacity:.85;}
+.cell-source{font-size:8px;font-weight:700;text-transform:uppercase;}
+.cell-guest{font-size:8px;font-weight:400;overflow:hidden;text-overflow:ellipsis;}
+td.booked-airbnb{background:#FFE0E5;}
+td.booked-booking{background:#DBEAFE;}
+td.booked-blocked{background:#F3F4F6;}
+td.booked-vrbo{background:#EDE9FE;}
+.legend{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.legend-dot{width:14px;height:14px;border-radius:3px;}
+
 @media(max-width:768px){.kpi-grid{grid-template-columns:repeat(2,1fr);}.main{padding:1rem;}}
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
 <div class="auth-wrap" id="loginScreen">
   <div class="auth-card">
     <div class="auth-logo">
@@ -122,42 +138,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="auth-title">Bentornato</div>
     <div class="auth-sub">Accedi al tuo account</div>
     <div class="role-tabs">
-      <div class="role-tab active" onclick="selectRole(this,'proprietario')">
-        <div class="role-tab-icon">🏢</div><span>Proprietario</span>
-      </div>
-      <div class="role-tab" onclick="selectRole(this,'cliente')">
-        <div class="role-tab-icon">👤</div><span>Cliente</span>
-      </div>
-      <div class="role-tab" onclick="selectRole(this,'pulizie')">
-        <div class="role-tab-icon">🧹</div><span>Pulizie</span>
-      </div>
+      <div class="role-tab active" onclick="selectRole(this,'proprietario')"><div class="role-tab-icon">🏢</div><span>Proprietario</span></div>
+      <div class="role-tab" onclick="selectRole(this,'cliente')"><div class="role-tab-icon">👤</div><span>Cliente</span></div>
+      <div class="role-tab" onclick="selectRole(this,'pulizie')"><div class="role-tab-icon">🧹</div><span>Pulizie</span></div>
     </div>
     <div class="error-msg" id="loginError"></div>
     <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="mario@rivaaffitti.it"></div>
     <div class="field"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
     <button class="btn-riva" id="loginBtn" onclick="doLogin()">Accedi</button>
-    <div class="auth-switch" style="margin-top:10px;"><a onclick="showForgotPassword()" style="color:var(--riva);cursor:pointer;font-size:13px;">Hai dimenticato la password?</a></div>
+    <div class="auth-switch" style="margin-top:10px;"><a onclick="showForgotPassword()">Hai dimenticato la password?</a></div>
     <div class="auth-switch">Non hai un account? <a onclick="showRegister()">Registrati gratis</a></div>
   </div>
 </div>
 
-<!-- SCHERMATA DIMENTICA PASSWORD -->
-<div class="auth-wrap" id="forgotScreen" style="display:none;">
-  <div class="auth-card">
-    <div class="auth-logo">
-      <div class="auth-logo-box">🏠</div>
-      <div class="auth-logo-name">Riva <span>Space</span></div>
-    </div>
-    <div class="auth-title">Reimposta password</div>
-    <div class="auth-sub">Inserisci la tua email e ti mandiamo un link per reimpostare la password</div>
-    <div class="error-msg" id="forgotError"></div>
-    <div class="success-msg" id="forgotSuccess" style="background:#E8F5E9;color:#2E7D32;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:12px;display:none;"></div>
-    <div class="field"><label>Email</label><input type="email" id="forgotEmail" placeholder="mario@rivaaffitti.it"></div>
-    <button class="btn-riva" id="forgotBtn" onclick="doForgotPassword()">Invia link di reset</button>
-    <div class="auth-switch"><a onclick="showLogin()" style="color:var(--riva);cursor:pointer;">← Torna al login</a></div>
-  </div>
-</div>
-
+<!-- REGISTRAZIONE -->
 <div class="auth-wrap" id="registerScreen" style="display:none;">
   <div class="auth-card">
     <div class="auth-logo">
@@ -176,17 +170,42 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-
+<!-- SUCCESSO REGISTRAZIONE -->
 <div class="auth-wrap" id="successScreen" style="display:none;">
   <div class="auth-card" style="text-align:center;">
     <div style="font-size:56px;margin-bottom:1rem;">🎉</div>
-    <div style="font-size:22px;font-weight:600;margin-bottom:.5rem;">Riva <span style="color:#FF3D55;">Space</span></div>
-    <div style="font-size:18px;font-weight:600;margin-bottom:.5rem;">Registrazione completata!</div>
-    <div style="font-size:13px;color:#6B6B6B;margin-bottom:1.5rem;line-height:1.6;">Abbiamo inviato un'email di conferma a<br><strong style="color:#1A1A1A;" id="confirmedEmail"></strong><br><br>Clicca il link nell'email per attivare il tuo account e iniziare a gestire le tue proprietà.</div>
-    <div style="background:#FFE8EB;border-radius:10px;padding:12px;font-size:13px;color:#CC1A2E;margin-bottom:1.25rem;">📧 Controlla anche la cartella <strong>spam</strong> se non la trovi in arrivo.</div>
-    <button style="width:100%;background:#FF3D55;border:none;border-radius:10px;padding:12px;font-size:14px;color:#fff;font-weight:600;cursor:pointer;" onclick="showLogin()">Torna al login</button>
+    <div class="auth-logo-name" style="font-size:22px;margin-bottom:.5rem;">Riva <span>Space</span></div>
+    <div class="auth-title" style="margin-bottom:.5rem;">Registrazione completata!</div>
+    <div class="auth-sub" style="margin-bottom:1.5rem;line-height:1.6;">
+      Abbiamo inviato un'email di conferma a<br>
+      <strong id="confirmedEmail" style="color:var(--text);"></strong><br><br>
+      Clicca il link nell'email per attivare il tuo account.
+    </div>
+    <div style="background:#FFE8EB;border-radius:10px;padding:12px;font-size:13px;color:#CC1A2E;margin-bottom:1.25rem;">
+      📧 Controlla anche la cartella <strong>spam</strong> se non la trovi.
+    </div>
+    <button class="btn-riva" onclick="showLogin()">Torna al login</button>
   </div>
 </div>
+
+<!-- DIMENTICA PASSWORD -->
+<div class="auth-wrap" id="forgotScreen" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-box">🏠</div>
+      <div class="auth-logo-name">Riva <span>Space</span></div>
+    </div>
+    <div class="auth-title">Reimposta password</div>
+    <div class="auth-sub">Ti mandiamo un link per reimpostare la password</div>
+    <div class="error-msg" id="forgotError"></div>
+    <div class="success-msg" id="forgotSuccess"></div>
+    <div class="field"><label>Email</label><input type="email" id="forgotEmail" placeholder="mario@rivaaffitti.it"></div>
+    <button class="btn-riva" id="forgotBtn" onclick="doForgotPassword()">Invia link di reset</button>
+    <div class="auth-switch"><a onclick="showLogin()">← Torna al login</a></div>
+  </div>
+</div>
+
+<!-- APP -->
 <div class="app" id="appShell">
   <div class="topbar">
     <div class="topbar-logo">
@@ -201,10 +220,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="nav-tabs">
       <div class="nav-tab active" onclick="showPage('dashboard',this)">Dashboard</div>
       <div class="nav-tab" onclick="showPage('proprieta',this)">Proprietà</div>
-      <div class="nav-tab" onclick="showPage('calendario',this);loadCalendario()">Calendario</div>
+      <div class="nav-tab" onclick="showPage('calendario',this);initCalendario()">Calendario</div>
       <div class="nav-tab" onclick="showPage('impostazioni',this)">Impostazioni</div>
     </div>
 
+    <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
       <div class="greeting">
         <h1 id="greetingTitle">Benvenuto!</h1>
@@ -220,10 +240,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div class="card-title">⚡ Per iniziare</div>
         <div class="row"><div class="row-left"><div class="dot ok"></div><div><div class="row-name">Account creato</div><div class="row-meta">Fatto!</div></div></div><span class="badge ok">✓</span></div>
         <div class="row" style="cursor:pointer" onclick="document.querySelectorAll('.nav-tab')[1].click()"><div class="row-left"><div class="dot warn" id="step2dot"></div><div><div class="row-name">Aggiungi prima proprietà</div><div class="row-meta" id="step2meta">Clicca per iniziare</div></div></div><span class="badge warn" id="step2badge">Da fare</span></div>
-        <div class="row"><div class="row-left"><div class="dot" style="background:var(--border)" id="step3dot"></div><div><div class="row-name">Collega Airbnb e Booking</div><div class="row-meta">Dopo aver aggiunto una proprietà</div></div></div><span class="badge" style="background:#F3F4F6;color:var(--text3);" id="step3badge">In attesa</span></div>
+        <div class="row"><div class="row-left"><div class="dot" style="background:var(--border)"></div><div><div class="row-name">Collega Airbnb e Booking</div><div class="row-meta">Dopo aver aggiunto una proprietà</div></div></div><span class="badge" style="background:#F3F4F6;color:var(--text3);">In attesa</span></div>
       </div>
     </div>
 
+    <!-- PROPRIETÀ -->
     <div class="page" id="page-proprieta">
       <div class="section-header">
         <div class="section-title">Le tue proprietà</div>
@@ -232,32 +253,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="prop-grid" id="propGrid"><div class="loading">Caricamento...</div></div>
     </div>
 
+    <!-- CALENDARIO -->
     <div class="page" id="page-calendario">
       <div class="section-header">
         <div class="section-title">Calendario occupazioni</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <select id="calPropSelect" onchange="loadCalendario()" style="border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:13px;background:var(--card);color:var(--text);">
-            <option value="all">Tutte le proprietà</option>
-          </select>
-        </div>
+        <button onclick="refreshCalendario()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer;color:var(--text2);">↻ Aggiorna</button>
       </div>
-      <div id="calLoading" style="text-align:center;padding:2rem;color:var(--text2);font-size:14px;display:none;">⏳ Caricamento prenotazioni...</div>
-      <div id="calError" style="background:#FFE8EB;color:var(--riva-dark);border-radius:10px;padding:12px;font-size:13px;margin-bottom:12px;display:none;"></div>
-      <div id="calContainer"></div>
-      <div style="display:flex;gap:16px;margin-top:1rem;flex-wrap:wrap;">
-        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><div style="width:12px;height:12px;background:#FFE8EB;border-radius:3px;border:1px solid #FFCCD2;"></div> Airbnb</div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><div style="width:12px;height:12px;background:#E6F1FB;border-radius:3px;border:1px solid #BFDBFE;"></div> Booking</div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><div style="width:12px;height:12px;background:#EDE9FE;border-radius:3px;border:1px solid #C4B5FD;"></div> VRBO/Altro</div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><div style="width:12px;height:12px;background:#FFE8EB;border-radius:3px;border:2px solid var(--riva);"></div> Oggi</div>
+      <div id="calLoading" style="text-align:center;padding:2rem;color:var(--text2);font-size:14px;display:none;">⏳ Caricamento prenotazioni in corso...</div>
+      <div id="calContent"></div>
+      <div class="legend" style="margin-top:1rem;">
+        <div class="legend-item"><div class="legend-dot" style="background:#FFE0E5;border:1px solid #FFAAB5;"></div> Airbnb</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#DBEAFE;border:1px solid #93C5FD;"></div> Booking</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#EDE9FE;border:1px solid #C4B5FD;"></div> VRBO</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#F3F4F6;border:1px solid #D1D5DB;"></div> Bloccato</div>
       </div>
     </div>
 
+    <!-- IMPOSTAZIONI -->
     <div class="page" id="page-impostazioni">
       <div class="section-title" style="margin-bottom:1rem;">Impostazioni account</div>
       <div class="card">
         <div class="card-title">👤 Profilo</div>
         <div class="field"><label>Nome</label><input type="text" id="settName" placeholder="Il tuo nome"></div>
-        <div class="field"><label>Email</label><input type="email" id="settEmail" placeholder="La tua email" disabled style="opacity:.6"></div>
+        <div class="field"><label>Email</label><input type="email" id="settEmail" disabled style="opacity:.6"></div>
         <div class="field"><label>Azienda</label><input type="text" id="settAzienda" placeholder="Nome azienda"></div>
         <button class="btn-riva" style="width:auto;padding:9px 20px;" onclick="saveSettings()">Salva modifiche</button>
       </div>
@@ -269,18 +287,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<!-- MODAL AGGIUNGI PROPRIETÀ -->
 <div class="modal-bg" id="modalAddProp">
   <div class="modal">
-    <div class="modal-title">
-      Nuova proprietà
-      <button class="modal-close" onclick="closeModal('modalAddProp')">✕</button>
-    </div>
+    <div class="modal-title">Nuova proprietà<button class="modal-close" onclick="closeModal('modalAddProp')">✕</button></div>
     <div class="field"><label>Nome proprietà *</label><input type="text" id="propNome" placeholder="Es. Appartamento Roma Centro"></div>
     <div class="field"><label>Indirizzo</label><input type="text" id="propIndirizzo" placeholder="Via Roma 1, Roma"></div>
     <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin:1rem 0 8px;">Collega le piattaforme</div>
     <div class="info-box">
       💡 <strong>Airbnb:</strong> Annunci → seleziona casa → Disponibilità → Sincronizza calendario → copia link "Esporta"<br><br>
-      💡 <strong>Booking:</strong> Extranet → Proprietà → Impostazioni → Sincronizza calendario → copia link iCal
+      💡 <strong>Booking:</strong> Extranet → Proprietà → Calendario → Aggiungi connessione → Salta all'esportazione → copia link iCal
     </div>
     <div class="field"><label>Link Airbnb (iCal)</label><input type="url" id="propAirbnb" placeholder="https://www.airbnb.it/calendar/ical/..."></div>
     <div class="field"><label>Link Booking.com (iCal)</label><input type="url" id="propBooking" placeholder="https://ical.booking.com/v1/..."></div>
@@ -296,7 +312,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <script>
 const SUPABASE_URL = 'https://ugxfgybstjgqwurpirnd.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_Yq4U2DMJHZsc-FZyV5pq6g_xKAtzdRX';
-
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -304,11 +319,9 @@ let currentRole = 'proprietario';
 let currentUser = null;
 let properties = [];
 
-// Init
 sb.auth.getSession().then(({ data: { session } }) => {
   if (session) { currentUser = session.user; showApp(); }
 });
-
 sb.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN' && session) { currentUser = session.user; showApp(); }
   if (event === 'SIGNED_OUT') { currentUser = null; showLogin(); }
@@ -316,13 +329,49 @@ sb.auth.onAuthStateChange((event, session) => {
 
 function selectRole(el, role) {
   document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  currentRole = role;
+  el.classList.add('active'); currentRole = role;
+}
+function showRegister() { document.getElementById('loginScreen').style.display='none'; document.getElementById('registerScreen').style.display='flex'; }
+function showLogin() {
+  ['registerScreen','forgotScreen','successScreen'].forEach(id => document.getElementById(id).style.display='none');
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('appShell').classList.remove('visible');
+}
+function showForgotPassword() { document.getElementById('loginScreen').style.display='none'; document.getElementById('forgotScreen').style.display='flex'; }
+
+async function doRegister() {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const azienda = document.getElementById('regAzienda').value.trim();
+  const errEl = document.getElementById('registerError');
+  const btn = document.getElementById('registerBtn');
+  if (!name || !email || !password) { showError(errEl, 'Compila tutti i campi obbligatori'); return; }
+  if (password.length < 8) { showError(errEl, 'La password deve avere almeno 8 caratteri'); return; }
+  btn.disabled = true; btn.textContent = 'Creando account...';
+  const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: name, azienda, role: currentRole } } });
+  if (error) {
+    let msg = error.message;
+    if (msg.includes('already registered') || msg.includes('already been registered')) msg = 'Questa email è già registrata. Prova ad accedere.';
+    if (msg.includes('Password should be')) msg = 'La password deve avere almeno 8 caratteri.';
+    showError(errEl, msg); btn.disabled = false; btn.textContent = 'Crea account gratis'; return;
+  }
+  if (data.user) await sb.from('profiles').upsert({ id: data.user.id, full_name: name, azienda, role: currentRole });
+  btn.disabled = false; btn.textContent = 'Crea account gratis';
+  document.getElementById('confirmedEmail').textContent = email;
+  document.getElementById('registerScreen').style.display = 'none';
+  document.getElementById('successScreen').style.display = 'flex';
 }
 
-function showForgotPassword() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('forgotScreen').style.display = 'flex';
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+  if (!email || !password) { showError(errEl, 'Inserisci email e password'); return; }
+  btn.disabled = true; btn.textContent = 'Accesso in corso...';
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { showError(errEl, 'Email o password non corretti'); btn.disabled = false; btn.textContent = 'Accedi'; }
 }
 
 async function doForgotPassword() {
@@ -332,74 +381,11 @@ async function doForgotPassword() {
   const btn = document.getElementById('forgotBtn');
   if (!email) { showError(errEl, 'Inserisci la tua email'); return; }
   btn.disabled = true; btn.textContent = 'Invio in corso...';
-  const { error } = await sb.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://rivaspace.it'
-  });
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: 'https://rivaspace.it' });
   btn.disabled = false; btn.textContent = 'Invia link di reset';
   if (error) { showError(errEl, 'Errore: ' + error.message); return; }
   succEl.textContent = '✓ Email inviata! Controlla la tua casella di posta.';
   succEl.style.display = 'block';
-}
-
-function showRegister() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('registerScreen').style.display = 'flex';
-}
-
-function showLogin() {
-  document.getElementById('registerScreen').style.display = 'none';
-  document.getElementById('forgotScreen').style.display = 'none';
-  document.getElementById('successScreen').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('appShell').classList.remove('visible');
-}
-
-async function doRegister() {
-  const name = document.getElementById('regName').value.trim();
-  const email = document.getElementById('regEmail').value.trim();
-  const password = document.getElementById('regPassword').value;
-  const azienda = document.getElementById('regAzienda').value.trim();
-  const errEl = document.getElementById('registerError');
-  const btn = document.getElementById('registerBtn');
-
-  if (!name || !email || !password) { showError(errEl, 'Compila tutti i campi obbligatori'); return; }
-  if (password.length < 8) { showError(errEl, 'La password deve avere almeno 8 caratteri'); return; }
-
-  btn.disabled = true; btn.textContent = 'Creando account...';
-  const { data, error } = await sb.auth.signUp({
-    email, password,
-    options: { data: { full_name: name, azienda, role: currentRole } }
-  });
-
-  if (error) {
-    let msg = error.message;
-    if (msg.includes('already registered') || msg.includes('already been registered')) msg = 'Questa email è già registrata. Prova ad accedere.';
-    if (msg.includes('Password should be')) msg = 'La password deve avere almeno 8 caratteri.';
-    if (msg.includes('Invalid email')) msg = 'Email non valida.';
-    showError(errEl, msg); btn.disabled = false; btn.textContent = 'Crea account gratis'; return;
-  }
-  
-  // Save profile
-  if (data.user) {
-    await sb.from('profiles').upsert({ id: data.user.id, full_name: name, azienda, role: currentRole });
-  }
-  btn.disabled = false; btn.textContent = 'Crea account gratis';
-  document.getElementById('registerScreen').style.display = 'none';
-  document.getElementById('successScreen').style.display = 'flex';
-  document.getElementById('confirmedEmail').textContent = email;
-}
-
-async function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  const errEl = document.getElementById('loginError');
-  const btn = document.getElementById('loginBtn');
-
-  if (!email || !password) { showError(errEl, 'Inserisci email e password'); return; }
-
-  btn.disabled = true; btn.textContent = 'Accesso in corso...';
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) { showError(errEl, 'Email o password non corretti'); btn.disabled = false; btn.textContent = 'Accedi'; }
 }
 
 async function doLogout() {
@@ -409,30 +395,26 @@ async function doLogout() {
 
 function showError(el, msg) {
   el.textContent = msg; el.style.display = 'block';
-  setTimeout(() => el.style.display = 'none', 4000);
+  setTimeout(() => el.style.display = 'none', 5000);
 }
 
 async function showApp() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('registerScreen').style.display = 'none';
   document.getElementById('appShell').classList.add('visible');
-
-  // Get profile
   const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
   const name = profile?.full_name || currentUser.email.split('@')[0];
   const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-  
   document.getElementById('userAvatar').textContent = initials;
   document.getElementById('greetingTitle').textContent = 'Ciao, ' + name.split(' ')[0] + '!';
   document.getElementById('settName').value = name;
   document.getElementById('settEmail').value = currentUser.email;
   document.getElementById('settAzienda').value = profile?.azienda || '';
-
   await loadProps();
 }
 
 async function loadProps() {
-  const { data } = await sb.from('properties').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  const { data } = await sb.from('properties').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: true });
   properties = data || [];
   renderProps();
   updateDashboard();
@@ -443,7 +425,6 @@ function updateDashboard() {
   document.getElementById('kpiProps').textContent = properties.length;
   document.getElementById('kpiCollegate').textContent = collegate;
   document.getElementById('kpiStato').textContent = properties.length > 0 ? '✓ Attivo' : '—';
-
   if (properties.length > 0) {
     document.getElementById('greetingSub').textContent = 'Hai ' + properties.length + ' proprietà gestite con Riva Space.';
     document.getElementById('step2dot').className = 'dot ok';
@@ -462,19 +443,17 @@ function renderProps() {
     card.innerHTML = `
       <div class="prop-card-name">${p.nome}</div>
       ${p.indirizzo ? `<div class="prop-card-addr">📍 ${p.indirizzo}</div>` : '<div style="margin-bottom:12px;"></div>'}
-      <div class="ota-row"><span class="ota-label">Airbnb</span><span class="ota-badge ${p.airbnb_url ? 'on' : 'off'}">${p.airbnb_url ? 'Collegato' : 'Da collegare'}</span></div>
-      <div class="ota-row"><span class="ota-label">Booking.com</span><span class="ota-badge ${p.booking_url ? 'on' : 'off'}">${p.booking_url ? 'Collegato' : 'Da collegare'}</span></div>
-      ${p.vrbo_url ? `<div class="ota-row"><span class="ota-label">VRBO</span><span class="ota-badge on">Collegato</span></div>` : ''}
-      ${p.sito_url ? `<div class="ota-row"><span class="ota-label">Sito proprio</span><span class="ota-badge on">Collegato</span></div>` : ''}
+      <div class="ota-row"><span class="ota-label">Airbnb</span><span class="ota-badge ${p.airbnb_url?'on':'off'}">${p.airbnb_url?'Collegato':'Da collegare'}</span></div>
+      <div class="ota-row"><span class="ota-label">Booking.com</span><span class="ota-badge ${p.booking_url?'on':'off'}">${p.booking_url?'Collegato':'Da collegare'}</span></div>
+      ${p.vrbo_url?`<div class="ota-row"><span class="ota-label">VRBO</span><span class="ota-badge on">Collegato</span></div>`:''}
+      ${p.sito_url?`<div class="ota-row"><span class="ota-label">Sito proprio</span><span class="ota-badge on">Collegato</span></div>`:''}
       <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
         <button onclick="deleteProp('${p.id}')" style="font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;">🗑 Elimina</button>
-      </div>
-    `;
+      </div>`;
     grid.appendChild(card);
   });
   const addBtn = document.createElement('div');
-  addBtn.className = 'prop-card-empty';
-  addBtn.onclick = openAddProp;
+  addBtn.className = 'prop-card-empty'; addBtn.onclick = openAddProp;
   addBtn.innerHTML = `<div style="font-size:32px;">🏠</div><p>Aggiungi proprietà</p><span>Collega Airbnb, Booking e altri</span>`;
   grid.appendChild(addBtn);
 }
@@ -487,28 +466,26 @@ async function saveProp() {
   if (!nome) { alert('Inserisci il nome della proprietà'); return; }
   const btn = document.getElementById('savePropBtn');
   btn.disabled = true; btn.textContent = 'Salvando...';
-
   const { error } = await sb.from('properties').insert({
-    user_id: currentUser.id,
-    nome,
+    user_id: currentUser.id, nome,
     indirizzo: document.getElementById('propIndirizzo').value.trim(),
     airbnb_url: document.getElementById('propAirbnb').value.trim(),
     booking_url: document.getElementById('propBooking').value.trim(),
     vrbo_url: document.getElementById('propVrbo').value.trim(),
     sito_url: document.getElementById('propSito').value.trim(),
   });
-
   btn.disabled = false; btn.textContent = 'Salva proprietà';
-  if (error) { alert('Errore nel salvare: ' + error.message); return; }
-
+  if (error) { alert('Errore: ' + error.message); return; }
   ['propNome','propIndirizzo','propAirbnb','propBooking','propVrbo','propSito'].forEach(id => document.getElementById(id).value = '');
   closeModal('modalAddProp');
+  calLoaded = false;
   await loadProps();
 }
 
 async function deleteProp(id) {
   if (!confirm('Eliminare questa proprietà?')) return;
   await sb.from('properties').delete().eq('id', id);
+  calLoaded = false;
   await loadProps();
 }
 
@@ -529,179 +506,252 @@ function showPage(id, tabEl) {
 // ===== CALENDARIO =====
 let calCurrentMonth = new Date().getMonth();
 let calCurrentYear = new Date().getFullYear();
+let calLoaded = false;
+let calDayMap = {}; // { propId: { date: { source, guest } } }
 
 function parseIcal(text) {
   const events = [];
-  const lines = text.replace(/\r\n /g, '').replace(/\r\n/g, '\n').split('\n');
+  const normalized = text.replace(/\r\n[ \t]/g, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const lines = normalized.split('\n');
   let current = null;
   for (const line of lines) {
-    if (line.startsWith('BEGIN:VEVENT')) current = {};
+    if (line.startsWith('BEGIN:VEVENT')) { current = {}; }
     else if (line.startsWith('END:VEVENT') && current) { events.push(current); current = null; }
     else if (current) {
-      if (line.startsWith('DTSTART')) current.start = line.split(':').slice(1).join(':').substring(0,8);
-      if (line.startsWith('DTEND')) current.end = line.split(':').slice(1).join(':').substring(0,8);
-      if (line.startsWith('SUMMARY')) current.summary = line.split(':').slice(1).join(':');
+      if (line.startsWith('DTSTART')) current.start = line.replace(/^DTSTART[^:]*:/,'').trim().substring(0,8);
+      if (line.startsWith('DTEND')) current.end = line.replace(/^DTEND[^:]*:/,'').trim().substring(0,8);
+      if (line.startsWith('SUMMARY')) current.summary = line.replace(/^SUMMARY:/,'').trim();
     }
   }
   return events;
 }
 
+function icalDateToString(d) {
+  return d.substring(0,4) + '-' + d.substring(4,6) + '-' + d.substring(6,8);
+}
+
 function dateRange(start, end) {
   const dates = [];
-  let d = new Date(start.substring(0,4)+'-'+start.substring(4,6)+'-'+start.substring(6,8));
-  const e = new Date(end.substring(0,4)+'-'+end.substring(4,6)+'-'+end.substring(6,8));
-  while (d < e) {
-    dates.push(d.toISOString().split('T')[0]);
-    d.setDate(d.getDate() + 1);
+  const s = new Date(icalDateToString(start));
+  const e = new Date(icalDateToString(end));
+  const cur = new Date(s);
+  while (cur < e) {
+    dates.push(cur.toISOString().split('T')[0]);
+    cur.setDate(cur.getDate() + 1);
   }
   return dates;
 }
 
-async function fetchIcal(url) {
-  try {
-    const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-    const res = await fetch(proxy);
-    if (!res.ok) return [];
-    const text = await res.text();
-    return parseIcal(text);
-  } catch { return []; }
+function classifyEvent(summary, source) {
+  if (!summary) return { type: source, guest: '' };
+  const s = summary.toLowerCase();
+  if (s === 'blocked' || s === 'not available' || s === 'unavailable' || s === 'blocco' || s === 'chiuso') {
+    return { type: 'blocked', guest: 'Bloccato da te' };
+  }
+  return { type: source, guest: summary };
 }
 
-let calDayMap = {};
-let calLoaded = false;
+async function fetchIcalViaProxy(url) {
+  const proxies = [
+    'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+    'https://corsproxy.io/?' + encodeURIComponent(url),
+  ];
+  for (const proxy of proxies) {
+    try {
+      const res = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
+      if (res.ok) {
+        const text = await res.text();
+        if (text.includes('BEGIN:VCALENDAR')) return text;
+      }
+    } catch {}
+  }
+  return null;
+}
 
-async function loadCalendario() {
+async function initCalendario() {
   if (!properties.length) {
-    document.getElementById('calContainer').innerHTML = '<div class="card" style="text-align:center;padding:2rem;color:var(--text2);">Aggiungi prima una proprietà con i link iCal per vedere il calendario.</div>';
+    document.getElementById('calContent').innerHTML = '<div class="card" style="text-align:center;padding:2rem;color:var(--text2);">Aggiungi prima una proprietà con i link iCal per vedere il calendario.</div>';
     return;
   }
+  if (!calLoaded) await loadCalEvents();
+  renderCalGrid();
+}
 
+async function refreshCalendario() {
+  calLoaded = false;
+  calDayMap = {};
+  await initCalendario();
+}
+
+async function loadCalEvents() {
   const loadEl = document.getElementById('calLoading');
-  const errEl = document.getElementById('calError');
+  loadEl.style.display = 'block';
+  document.getElementById('calContent').innerHTML = '';
+  calDayMap = {};
 
-  // Update select
-  const sel = document.getElementById('calPropSelect');
-  const selVal = sel.value;
-  sel.innerHTML = '<option value="all">Tutte le proprietà</option>';
-  properties.forEach(p => {
-    const opt = document.createElement('option');
-    opt.value = p.id; opt.textContent = p.nome;
-    if (p.id === selVal) opt.selected = true;
-    sel.appendChild(opt);
-  });
+  for (const prop of properties) {
+    calDayMap[prop.id] = {};
+    const sources = [
+      { url: prop.airbnb_url, type: 'airbnb' },
+      { url: prop.booking_url, type: 'booking' },
+      { url: prop.vrbo_url, type: 'vrbo' },
+      { url: prop.sito_url, type: 'vrbo' },
+    ].filter(s => s.url);
 
-  if (!calLoaded) {
-    loadEl.style.display = 'block';
-    errEl.style.display = 'none';
-    calDayMap = {};
-
-    for (const prop of properties) {
-      const sources = [
-        { url: prop.airbnb_url, type: 'airbnb' },
-        { url: prop.booking_url, type: 'booking' },
-        { url: prop.vrbo_url, type: 'vrbo' },
-        { url: prop.sito_url, type: 'vrbo' },
-      ].filter(s => s.url);
-
-      for (const src of sources) {
-        const events = await fetchIcal(src.url);
-        for (const ev of events) {
-          if (!ev.start || !ev.end) continue;
-          const dates = dateRange(ev.start, ev.end);
-          for (const d of dates) {
-            if (!calDayMap[d]) calDayMap[d] = [];
-            calDayMap[d].push({ type: src.type, propName: prop.nome, propId: prop.id });
+    for (const src of sources) {
+      const text = await fetchIcalViaProxy(src.url);
+      if (!text) continue;
+      const events = parseIcal(text);
+      for (const ev of events) {
+        if (!ev.start || !ev.end) continue;
+        const dates = dateRange(ev.start, ev.end);
+        const classified = classifyEvent(ev.summary, src.type);
+        for (const d of dates) {
+          if (!calDayMap[prop.id][d]) {
+            calDayMap[prop.id][d] = classified;
           }
         }
       }
     }
-    loadEl.style.display = 'none';
-    calLoaded = true;
   }
 
-  renderCalMonth();
+  loadEl.style.display = 'none';
+  calLoaded = true;
 }
 
-function renderCalMonth() {
-  const selVal = document.getElementById('calPropSelect').value;
-  const container = document.getElementById('calContainer');
+function renderCalGrid() {
+  const content = document.getElementById('calContent');
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
-  const dayNames = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
   const monthNames = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
-
   const year = calCurrentYear;
   const month = calCurrentMonth;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  let firstDay = new Date(year, month, 1).getDay();
-  firstDay = firstDay === 0 ? 6 : firstDay - 1;
 
-  container.innerHTML = '';
+  content.innerHTML = '';
 
-  // Nav header
-  const nav = document.createElement('div');
-  nav.style = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;';
-  nav.innerHTML = `
-    <button onclick="calPrev()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:18px;">‹</button>
-    <div style="font-size:16px;font-weight:600;color:var(--text);">${monthNames[month]} ${year}</div>
-    <button onclick="calNext()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:18px;">›</button>
+  // Header con navigazione
+  const header = document.createElement('div');
+  header.className = 'cal-header';
+  header.innerHTML = `
+    <button class="cal-nav-btn" onclick="calPrev()">‹</button>
+    <div class="cal-month-name">${monthNames[month]} ${year}</div>
+    <button class="cal-nav-btn" onclick="calNext()">›</button>
   `;
-  container.appendChild(nav);
+  const wrap = document.createElement('div');
+  wrap.className = 'cal-wrap';
+  wrap.appendChild(header);
 
-  const grid = document.createElement('div');
-  grid.className = 'cal-grid';
+  // Tabella
+  const tableWrap = document.createElement('div');
+  tableWrap.style.overflowX = 'auto';
 
-  dayNames.forEach(d => {
-    const el = document.createElement('div');
-    el.className = 'cal-day-name';
-    el.textContent = d;
-    grid.appendChild(el);
-  });
+  const table = document.createElement('table');
+  table.className = 'cal-table';
 
-  for (let i = 0; i < firstDay; i++) {
-    const el = document.createElement('div');
-    el.className = 'cal-day empty';
-    grid.appendChild(el);
-  }
+  // Header giorni
+  const thead = document.createElement('thead');
+  const headRow = document.createElement('tr');
+  const thProp = document.createElement('th');
+  thProp.className = 'prop-col';
+  thProp.textContent = 'Proprietà';
+  headRow.appendChild(thProp);
 
   for (let d = 1; d <= daysInMonth; d++) {
+    const th = document.createElement('th');
     const dateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-    const el = document.createElement('div');
-    el.className = 'cal-day' + (dateStr === todayStr ? ' today' : '');
-
-    const num = document.createElement('div');
-    num.className = 'cal-day-num';
-    num.textContent = d;
-    el.appendChild(num);
-
-    let events = calDayMap[dateStr] || [];
-    if (selVal !== 'all') events = events.filter(e => e.propId === selVal);
-
-    const types = [...new Set(events.map(e => e.type))];
-    types.forEach(type => {
-      const propsOfType = events.filter(e => e.type === type);
-      const ev = document.createElement('div');
-      ev.className = 'cal-event ' + type;
-      ev.textContent = propsOfType[0]?.propName || type;
-      el.appendChild(ev);
-    });
-
-    grid.appendChild(el);
+    th.textContent = d;
+    if (dateStr === todayStr) th.style.cssText = 'color:var(--riva);font-weight:700;background:#FFF5F5;';
+    headRow.appendChild(th);
   }
+  thead.appendChild(headRow);
+  table.appendChild(thead);
 
-  container.appendChild(grid);
+  // Righe proprietà
+  const tbody = document.createElement('tbody');
+  properties.forEach(prop => {
+    const tr = document.createElement('tr');
+
+    // Nome proprietà
+    const tdName = document.createElement('td');
+    tdName.className = 'prop-name-cell';
+    tdName.textContent = prop.nome;
+    tdName.title = prop.nome;
+    tr.appendChild(tdName);
+
+    // Giorni
+    let d = 1;
+    while (d <= daysInMonth) {
+      const dateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+      const event = calDayMap[prop.id]?.[dateStr];
+      const isToday = dateStr === todayStr;
+
+      if (event) {
+        // Trova quanti giorni consecutivi ha questa prenotazione
+        let span = 1;
+        let dd = d + 1;
+        while (dd <= daysInMonth) {
+          const nextDate = year + '-' + String(month+1).padStart(2,'0') + '-' + String(dd).padStart(2,'0');
+          const nextEvent = calDayMap[prop.id]?.[nextDate];
+          if (nextEvent && nextEvent.type === event.type && nextEvent.guest === event.guest) {
+            span++; dd++;
+          } else break;
+        }
+
+        const td = document.createElement('td');
+        td.colSpan = span;
+        if (event.type === 'airbnb') td.className = 'booked-airbnb';
+        else if (event.type === 'booking') td.className = 'booked-booking';
+        else if (event.type === 'blocked') td.className = 'booked-blocked';
+        else td.className = 'booked-vrbo';
+        if (isToday) td.style.outline = '2px solid var(--riva)';
+
+        const inner = document.createElement('div');
+        inner.className = 'cal-cell-inner';
+
+        const source = document.createElement('div');
+        source.className = 'cell-source';
+        if (event.type === 'airbnb') source.textContent = 'Airbnb';
+        else if (event.type === 'booking') source.textContent = 'Booking';
+        else if (event.type === 'blocked') source.textContent = 'Bloccato';
+        else source.textContent = 'VRBO';
+
+        const guest = document.createElement('div');
+        guest.className = 'cell-guest';
+        if (event.type !== 'blocked' && event.guest && event.guest !== 'Airbnb' && event.guest !== 'Booking') {
+          guest.textContent = event.guest;
+        }
+
+        inner.appendChild(source);
+        if (guest.textContent) inner.appendChild(guest);
+        td.appendChild(inner);
+        tr.appendChild(td);
+        d += span;
+      } else {
+        const td = document.createElement('td');
+        if (isToday) td.style.cssText = 'background:#FFF5F5;';
+        tr.appendChild(td);
+        d++;
+      }
+    }
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+  tableWrap.appendChild(table);
+  wrap.appendChild(tableWrap);
+  content.appendChild(wrap);
 }
 
 function calPrev() {
   calCurrentMonth--;
   if (calCurrentMonth < 0) { calCurrentMonth = 11; calCurrentYear--; }
-  renderCalMonth();
+  renderCalGrid();
 }
-
 function calNext() {
   calCurrentMonth++;
   if (calCurrentMonth > 11) { calCurrentMonth = 0; calCurrentYear++; }
-  renderCalMonth();
+  renderCalGrid();
 }
 </script>
 </body>
