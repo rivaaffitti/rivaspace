@@ -553,10 +553,10 @@ function classifyEvent(summary, source) {
     }
   }
   
-  // Airbnb: "Airbnb (Not Available)" = prenotazione reale o blocco da Airbnb
+  // Airbnb: "Airbnb (Not Available)" = blocco automatico importato da Booking → ignoriamo
   if (source === 'airbnb') {
-    if (s === 'blocked' || s === 'owner block' || s === 'blocco proprietario') {
-      return { type: 'blocked', guest: 'Bloccato da te' };
+    if (s.includes('not available') || s === 'blocked' || s === 'owner block') {
+      return null; // ignora completamente
     }
     return { type: 'airbnb', guest: 'Prenotato' };
   }
@@ -639,6 +639,7 @@ async function loadCalEvents() {
         if (!ev.start || !ev.end) continue;
         const dates = dateRange(ev.start, ev.end);
         const classified = classifyEvent(ev.summary, src.type);
+        if (!classified) continue; // ignora blocchi automatici
         for (const d of dates) {
           if (calDayMap[prop.id][d]) {
             const existing = calDayMap[prop.id][d];
