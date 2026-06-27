@@ -625,8 +625,8 @@ async function loadCalEvents() {
   for (const prop of properties) {
     calDayMap[prop.id] = {};
     const sources = [
-      { url: prop.airbnb_url, type: 'airbnb' },
       { url: prop.booking_url, type: 'booking' },
+      { url: prop.airbnb_url, type: 'airbnb' },
       { url: prop.vrbo_url, type: 'vrbo' },
       { url: prop.sito_url, type: 'vrbo' },
     ].filter(s => s.url);
@@ -640,15 +640,14 @@ async function loadCalEvents() {
         const dates = dateRange(ev.start, ev.end);
         const classified = classifyEvent(ev.summary, src.type);
         for (const d of dates) {
-          // Non sovrascrivere una prenotazione reale con un blocco
           if (calDayMap[prop.id][d]) {
             const existing = calDayMap[prop.id][d];
-            // Se già c'è una prenotazione reale, non sovrascrivere con blocked
+            // Non sovrascrivere mai una prenotazione reale con un blocco
             if (classified.type === 'blocked' && existing.type !== 'blocked') continue;
-            // Se già c'è Booking, non sovrascrivere con Airbnb (potrebbe essere un blocco automatico)
-            if (src.type === 'airbnb' && existing.type === 'booking') continue;
-            // Se già c'è Airbnb, non sovrascrivere con Booking
-            if (src.type === 'booking' && existing.type === 'airbnb') continue;
+            // Non sovrascrivere mai Booking con Airbnb (Airbnb potrebbe aver importato Booking)
+            if (classified.type === 'airbnb' && existing.type === 'booking') continue;
+            // Non sovrascrivere mai Airbnb con Booking
+            if (classified.type === 'booking' && existing.type === 'airbnb') continue;
           }
           calDayMap[prop.id][d] = classified;
         }
