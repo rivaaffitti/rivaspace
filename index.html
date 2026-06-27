@@ -543,12 +543,20 @@ function dateRange(start, end) {
 }
 
 function classifyEvent(summary, source) {
-  if (!summary) return { type: source, guest: '' };
-  const s = summary.toLowerCase();
-  if (s === 'blocked' || s === 'not available' || s === 'unavailable' || s === 'blocco' || s === 'chiuso') {
+  if (!summary) return { type: source, guest: 'Prenotato' };
+  const s = summary.toLowerCase().trim();
+  // Date bloccate manualmente
+  if (s === 'blocked' || s === 'not available' || s === 'unavailable' || 
+      s === 'blocco' || s === 'chiuso' || s === 'closed' || s === 'owner block' ||
+      s === 'airbnb (not available)' || s === 'booking (not available)' ||
+      s.includes('not available') || s.includes('unavailable') || s.includes('blocked')) {
     return { type: 'blocked', guest: 'Bloccato da te' };
   }
-  return { type: source, guest: summary };
+  // Prenotazione reale — il nome ospite è spesso oscurato dalle piattaforme
+  // Mostriamo "Prenotato" se il nome non è significativo
+  const cleanSummary = summary.trim();
+  if (!cleanSummary || cleanSummary.length < 2) return { type: source, guest: 'Prenotato' };
+  return { type: source, guest: 'Prenotato' };
 }
 
 async function fetchIcalViaProxy(url) {
@@ -711,15 +719,17 @@ function renderCalGrid() {
 
         const source = document.createElement('div');
         source.className = 'cell-source';
-        if (event.type === 'airbnb') source.textContent = 'Airbnb';
-        else if (event.type === 'booking') source.textContent = 'Booking';
-        else if (event.type === 'blocked') source.textContent = 'Bloccato';
-        else source.textContent = 'VRBO';
+        if (event.type === 'airbnb') source.textContent = '🔴 Airbnb';
+        else if (event.type === 'booking') source.textContent = '🔵 Booking';
+        else if (event.type === 'blocked') source.textContent = '⛔ Bloccato';
+        else source.textContent = '🟣 VRBO';
 
         const guest = document.createElement('div');
         guest.className = 'cell-guest';
-        if (event.type !== 'blocked' && event.guest && event.guest !== 'Airbnb' && event.guest !== 'Booking') {
-          guest.textContent = event.guest;
+        if (event.type === 'blocked') {
+          guest.textContent = 'da te';
+        } else {
+          guest.textContent = 'Prenotato';
         }
 
         inner.appendChild(source);
@@ -753,6 +763,17 @@ function calNext() {
   if (calCurrentMonth > 11) { calCurrentMonth = 0; calCurrentYear++; }
   renderCalGrid();
 }
+
+// Auto-sincronizzazione ogni 10 minuti
+setInterval(async () => {
+  if (currentUser && calLoaded) {
+    console.log('Auto-sync calendario...');
+    calLoaded = false;
+    calDayMap = {};
+    await loadCalEvents();
+    renderCalGrid();
+  }
+}, 10 * 60 * 1000);
 </script>
 </body>
 </html>
