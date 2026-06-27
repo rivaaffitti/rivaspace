@@ -724,10 +724,42 @@ function renderCalGrid() {
     let d = 1;
     while (d <= daysInMonth) {
       const dateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+      const prevDateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d-1).padStart(2,'0');
+      const nextDateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d+1).padStart(2,'0');
       const event = calDayMap[prop.id]?.[dateStr];
+      const prevEvent = calDayMap[prop.id]?.[prevDateStr];
+      const nextEvent = calDayMap[prop.id]?.[nextDateStr];
       const isToday = dateStr === todayStr;
 
-      if (event) {
+      // Controlla se è un giorno di checkout/checkin (stesso giorno, evento diverso)
+      const isCheckoutCheckin = !event && prevEvent && nextEvent && 
+        (prevEvent.type !== nextEvent.type || prevEvent.guest !== nextEvent.guest);
+
+      if (isCheckoutCheckin) {
+        // Cella divisa a metà
+        const td = document.createElement('td');
+        if (isToday) td.style.outline = '2px solid var(--riva)';
+        td.style.padding = '0';
+        td.style.position = 'relative';
+        td.style.overflow = 'hidden';
+
+        // Metà sinistra (checkout)
+        const leftDiv = document.createElement('div');
+        leftDiv.style.cssText = `position:absolute;left:0;top:0;width:50%;height:100%;
+          background:${prevEvent.type==='airbnb'?'#FFE0E5':prevEvent.type==='booking'?'#DBEAFE':prevEvent.type==='blocked'?'#F3F4F6':'#EDE9FE'};
+          border-radius:0 4px 4px 0;`;
+        td.appendChild(leftDiv);
+
+        // Metà destra (checkin)
+        const rightDiv = document.createElement('div');
+        rightDiv.style.cssText = `position:absolute;right:0;top:0;width:50%;height:100%;
+          background:${nextEvent.type==='airbnb'?'#FFE0E5':nextEvent.type==='booking'?'#DBEAFE':nextEvent.type==='blocked'?'#F3F4F6':'#EDE9FE'};
+          border-radius:4px 0 0 4px;`;
+        td.appendChild(rightDiv);
+
+        tr.appendChild(td);
+        d++;
+      } else if (event) {
         // Trova quanti giorni consecutivi ha questa prenotazione
         let span = 1;
         let dd = d + 1;
