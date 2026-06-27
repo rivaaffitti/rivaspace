@@ -545,17 +545,31 @@ function dateRange(start, end) {
 function classifyEvent(summary, source) {
   if (!summary) return { type: source, guest: 'Prenotato' };
   const s = summary.toLowerCase().trim();
-  // Date bloccate manualmente
-  if (s === 'blocked' || s === 'not available' || s === 'unavailable' || 
-      s === 'blocco' || s === 'chiuso' || s === 'closed' || s === 'owner block' ||
-      s === 'airbnb (not available)' || s === 'booking (not available)' ||
-      s.includes('not available') || s.includes('unavailable') || s.includes('blocked')) {
-    return { type: 'blocked', guest: 'Bloccato da te' };
+  
+  // Date bloccate MANUALMENTE dal proprietario (solo se non vengono da una OTA)
+  if (source !== 'airbnb' && source !== 'booking' && source !== 'vrbo') {
+    if (s.includes('blocked') || s.includes('not available') || s.includes('unavailable')) {
+      return { type: 'blocked', guest: 'Bloccato da te' };
+    }
   }
-  // Prenotazione reale — il nome ospite è spesso oscurato dalle piattaforme
-  // Mostriamo "Prenotato" se il nome non è significativo
-  const cleanSummary = summary.trim();
-  if (!cleanSummary || cleanSummary.length < 2) return { type: source, guest: 'Prenotato' };
+  
+  // Airbnb: "Airbnb (Not Available)" = prenotazione reale o blocco da Airbnb
+  if (source === 'airbnb') {
+    if (s === 'blocked' || s === 'owner block' || s === 'blocco proprietario') {
+      return { type: 'blocked', guest: 'Bloccato da te' };
+    }
+    return { type: 'airbnb', guest: 'Prenotato' };
+  }
+  
+  // Booking: tutto quello che arriva dal link Booking è una prenotazione o blocco
+  if (source === 'booking') {
+    if (s.includes('owner') || s === 'blocco' || s === 'chiuso' || s === 'closed') {
+      return { type: 'blocked', guest: 'Bloccato da te' };
+    }
+    return { type: 'booking', guest: 'Prenotato' };
+  }
+
+  // VRBO e altri
   return { type: source, guest: 'Prenotato' };
 }
 
