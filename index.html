@@ -95,6 +95,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-cancel{background:transparent;border:1px solid var(--border);border-radius:9px;padding:9px 18px;font-size:13px;color:var(--text2);cursor:pointer;}
 .btn-save{background:var(--riva);border:none;border-radius:9px;padding:9px 18px;font-size:13px;color:#fff;font-weight:600;cursor:pointer;}
 .loading{text-align:center;padding:3rem;color:var(--text2);font-size:14px;}
+.cal-month-title{font-size:15px;font-weight:600;color:var(--text);margin:1.25rem 0 .75rem;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:1.5rem;}
+.cal-day-name{font-size:11px;color:var(--text3);text-align:center;padding:4px 0;font-weight:500;}
+.cal-day{min-height:52px;border-radius:6px;padding:4px;background:var(--card);border:1px solid var(--border);}
+.cal-day.empty{background:transparent;border-color:transparent;}
+.cal-day.today{border:2px solid var(--riva);}
+.cal-day-num{font-size:11px;color:var(--text2);margin-bottom:2px;font-weight:500;}
+.cal-day.today .cal-day-num{color:var(--riva);font-weight:700;}
+.cal-event{font-size:9px;border-radius:3px;padding:1px 4px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cal-event.airbnb{background:#FFE8EB;color:#CC1A2E;}
+.cal-event.booking{background:#E6F1FB;color:#1D4ED8;}
+.cal-event.vrbo{background:#EDE9FE;color:#6D28D9;}
+.cal-event.conflict{background:#FEF3C7;color:#9A6000;font-weight:700;}
 @media(max-width:768px){.kpi-grid{grid-template-columns:repeat(2,1fr);}.main{padding:1rem;}}
 </style>
 </head>
@@ -188,6 +201,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="nav-tabs">
       <div class="nav-tab active" onclick="showPage('dashboard',this)">Dashboard</div>
       <div class="nav-tab" onclick="showPage('proprieta',this)">Proprietà</div>
+      <div class="nav-tab" onclick="showPage('calendario',this);loadCalendario()">Calendario</div>
       <div class="nav-tab" onclick="showPage('impostazioni',this)">Impostazioni</div>
     </div>
 
@@ -216,6 +230,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <button class="btn-add" onclick="openAddProp()">+ Aggiungi</button>
       </div>
       <div class="prop-grid" id="propGrid"><div class="loading">Caricamento...</div></div>
+    </div>
+
+    <div class="page" id="page-calendario">
+      <div class="section-header">
+        <div class="section-title">Calendario occupazioni</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <select id="calPropSelect" onchange="loadCalendario()" style="border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:13px;background:var(--card);color:var(--text);">
+            <option value="all">Tutte le proprietà</option>
+          </select>
+        </div>
+      </div>
+      <div id="calLoading" style="text-align:center;padding:2rem;color:var(--text2);font-size:14px;display:none;">⏳ Caricamento prenotazioni...</div>
+      <div id="calError" style="background:#FFE8EB;color:var(--riva-dark);border-radius:10px;padding:12px;font-size:13px;margin-bottom:12px;display:none;"></div>
+      <div id="calContainer"></div>
+      <div style="display:flex;gap:16px;margin-top:1rem;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><div style="width:12px;height:12px;background:#FFE8EB;border-radius:3px;border:1px solid #FFCCD2;"></div> Airbnb</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><div style="width:12px;height:12px;background:#E6F1FB;border-radius:3px;border:1px solid #BFDBFE;"></div> Booking</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><div style="width:12px;height:12px;background:#EDE9FE;border-radius:3px;border:1px solid #C4B5FD;"></div> VRBO/Altro</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><div style="width:12px;height:12px;background:#FFE8EB;border-radius:3px;border:2px solid var(--riva);"></div> Oggi</div>
+      </div>
     </div>
 
     <div class="page" id="page-impostazioni">
@@ -490,6 +524,184 @@ function showPage(id, tabEl) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   if (tabEl) tabEl.classList.add('active');
+}
+
+// ===== CALENDARIO =====
+let calCurrentMonth = new Date().getMonth();
+let calCurrentYear = new Date().getFullYear();
+
+function parseIcal(text) {
+  const events = [];
+  const lines = text.replace(/\r\n /g, '').replace(/\r\n/g, '\n').split('\n');
+  let current = null;
+  for (const line of lines) {
+    if (line.startsWith('BEGIN:VEVENT')) current = {};
+    else if (line.startsWith('END:VEVENT') && current) { events.push(current); current = null; }
+    else if (current) {
+      if (line.startsWith('DTSTART')) current.start = line.split(':').slice(1).join(':').substring(0,8);
+      if (line.startsWith('DTEND')) current.end = line.split(':').slice(1).join(':').substring(0,8);
+      if (line.startsWith('SUMMARY')) current.summary = line.split(':').slice(1).join(':');
+    }
+  }
+  return events;
+}
+
+function dateRange(start, end) {
+  const dates = [];
+  let d = new Date(start.substring(0,4)+'-'+start.substring(4,6)+'-'+start.substring(6,8));
+  const e = new Date(end.substring(0,4)+'-'+end.substring(4,6)+'-'+end.substring(6,8));
+  while (d < e) {
+    dates.push(d.toISOString().split('T')[0]);
+    d.setDate(d.getDate() + 1);
+  }
+  return dates;
+}
+
+async function fetchIcal(url) {
+  try {
+    const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+    const res = await fetch(proxy);
+    if (!res.ok) return [];
+    const text = await res.text();
+    return parseIcal(text);
+  } catch { return []; }
+}
+
+let calDayMap = {};
+let calLoaded = false;
+
+async function loadCalendario() {
+  if (!properties.length) {
+    document.getElementById('calContainer').innerHTML = '<div class="card" style="text-align:center;padding:2rem;color:var(--text2);">Aggiungi prima una proprietà con i link iCal per vedere il calendario.</div>';
+    return;
+  }
+
+  const loadEl = document.getElementById('calLoading');
+  const errEl = document.getElementById('calError');
+
+  // Update select
+  const sel = document.getElementById('calPropSelect');
+  const selVal = sel.value;
+  sel.innerHTML = '<option value="all">Tutte le proprietà</option>';
+  properties.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id; opt.textContent = p.nome;
+    if (p.id === selVal) opt.selected = true;
+    sel.appendChild(opt);
+  });
+
+  if (!calLoaded) {
+    loadEl.style.display = 'block';
+    errEl.style.display = 'none';
+    calDayMap = {};
+
+    for (const prop of properties) {
+      const sources = [
+        { url: prop.airbnb_url, type: 'airbnb' },
+        { url: prop.booking_url, type: 'booking' },
+        { url: prop.vrbo_url, type: 'vrbo' },
+        { url: prop.sito_url, type: 'vrbo' },
+      ].filter(s => s.url);
+
+      for (const src of sources) {
+        const events = await fetchIcal(src.url);
+        for (const ev of events) {
+          if (!ev.start || !ev.end) continue;
+          const dates = dateRange(ev.start, ev.end);
+          for (const d of dates) {
+            if (!calDayMap[d]) calDayMap[d] = [];
+            calDayMap[d].push({ type: src.type, propName: prop.nome, propId: prop.id });
+          }
+        }
+      }
+    }
+    loadEl.style.display = 'none';
+    calLoaded = true;
+  }
+
+  renderCalMonth();
+}
+
+function renderCalMonth() {
+  const selVal = document.getElementById('calPropSelect').value;
+  const container = document.getElementById('calContainer');
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  const dayNames = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+  const monthNames = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+
+  const year = calCurrentYear;
+  const month = calCurrentMonth;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  let firstDay = new Date(year, month, 1).getDay();
+  firstDay = firstDay === 0 ? 6 : firstDay - 1;
+
+  container.innerHTML = '';
+
+  // Nav header
+  const nav = document.createElement('div');
+  nav.style = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;';
+  nav.innerHTML = `
+    <button onclick="calPrev()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:18px;">‹</button>
+    <div style="font-size:16px;font-weight:600;color:var(--text);">${monthNames[month]} ${year}</div>
+    <button onclick="calNext()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:18px;">›</button>
+  `;
+  container.appendChild(nav);
+
+  const grid = document.createElement('div');
+  grid.className = 'cal-grid';
+
+  dayNames.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-day-name';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  for (let i = 0; i < firstDay; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day empty';
+    grid.appendChild(el);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const el = document.createElement('div');
+    el.className = 'cal-day' + (dateStr === todayStr ? ' today' : '');
+
+    const num = document.createElement('div');
+    num.className = 'cal-day-num';
+    num.textContent = d;
+    el.appendChild(num);
+
+    let events = calDayMap[dateStr] || [];
+    if (selVal !== 'all') events = events.filter(e => e.propId === selVal);
+
+    const types = [...new Set(events.map(e => e.type))];
+    types.forEach(type => {
+      const propsOfType = events.filter(e => e.type === type);
+      const ev = document.createElement('div');
+      ev.className = 'cal-event ' + type;
+      ev.textContent = propsOfType[0]?.propName || type;
+      el.appendChild(ev);
+    });
+
+    grid.appendChild(el);
+  }
+
+  container.appendChild(grid);
+}
+
+function calPrev() {
+  calCurrentMonth--;
+  if (calCurrentMonth < 0) { calCurrentMonth = 11; calCurrentYear--; }
+  renderCalMonth();
+}
+
+function calNext() {
+  calCurrentMonth++;
+  if (calCurrentMonth > 11) { calCurrentMonth = 0; calCurrentYear++; }
+  renderCalMonth();
 }
 </script>
 </body>
