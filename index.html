@@ -123,7 +123,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="mario@rivaaffitti.it"></div>
     <div class="field"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
     <button class="btn-riva" id="loginBtn" onclick="doLogin()">Accedi</button>
+    <div class="auth-switch" style="margin-top:10px;"><a onclick="showForgotPassword()" style="color:var(--riva);cursor:pointer;font-size:13px;">Hai dimenticato la password?</a></div>
     <div class="auth-switch">Non hai un account? <a onclick="showRegister()">Registrati gratis</a></div>
+  </div>
+</div>
+
+<!-- SCHERMATA DIMENTICA PASSWORD -->
+<div class="auth-wrap" id="forgotScreen" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-box">🏠</div>
+      <div class="auth-logo-name">Riva <span>Space</span></div>
+    </div>
+    <div class="auth-title">Reimposta password</div>
+    <div class="auth-sub">Inserisci la tua email e ti mandiamo un link per reimpostare la password</div>
+    <div class="error-msg" id="forgotError"></div>
+    <div class="success-msg" id="forgotSuccess" style="background:#E8F5E9;color:#2E7D32;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:12px;display:none;"></div>
+    <div class="field"><label>Email</label><input type="email" id="forgotEmail" placeholder="mario@rivaaffitti.it"></div>
+    <button class="btn-riva" id="forgotBtn" onclick="doForgotPassword()">Invia link di reset</button>
+    <div class="auth-switch"><a onclick="showLogin()" style="color:var(--riva);cursor:pointer;">← Torna al login</a></div>
   </div>
 </div>
 
@@ -268,6 +286,27 @@ function selectRole(el, role) {
   currentRole = role;
 }
 
+function showForgotPassword() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('forgotScreen').style.display = 'flex';
+}
+
+async function doForgotPassword() {
+  const email = document.getElementById('forgotEmail').value.trim();
+  const errEl = document.getElementById('forgotError');
+  const succEl = document.getElementById('forgotSuccess');
+  const btn = document.getElementById('forgotBtn');
+  if (!email) { showError(errEl, 'Inserisci la tua email'); return; }
+  btn.disabled = true; btn.textContent = 'Invio in corso...';
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://rivaspace.it'
+  });
+  btn.disabled = false; btn.textContent = 'Invia link di reset';
+  if (error) { showError(errEl, 'Errore: ' + error.message); return; }
+  succEl.textContent = '✓ Email inviata! Controlla la tua casella di posta.';
+  succEl.style.display = 'block';
+}
+
 function showRegister() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('registerScreen').style.display = 'flex';
@@ -275,6 +314,8 @@ function showRegister() {
 
 function showLogin() {
   document.getElementById('registerScreen').style.display = 'none';
+  document.getElementById('forgotScreen').style.display = 'none';
+  document.getElementById('successScreen').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('appShell').classList.remove('visible');
 }
@@ -296,7 +337,13 @@ async function doRegister() {
     options: { data: { full_name: name, azienda, role: currentRole } }
   });
 
-  if (error) { showError(errEl, error.message); btn.disabled = false; btn.textContent = 'Crea account gratis'; return; }
+  if (error) {
+    let msg = error.message;
+    if (msg.includes('already registered') || msg.includes('already been registered')) msg = 'Questa email è già registrata. Prova ad accedere.';
+    if (msg.includes('Password should be')) msg = 'La password deve avere almeno 8 caratteri.';
+    if (msg.includes('Invalid email')) msg = 'Email non valida.';
+    showError(errEl, msg); btn.disabled = false; btn.textContent = 'Crea account gratis'; return;
+  }
   
   // Save profile
   if (data.user) {
